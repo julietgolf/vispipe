@@ -1,6 +1,6 @@
 from setuptools import setup 
 
-REQUIREMENTS = ["numpy","cupy-cuda11x","pint","PyMuPDF","netCDF4","matplotlib"]
+REQUIREMENTS = ["numpy","pint","PyMuPDF","netCDF4","matplotlib"]
 
 CLASSIFIERS = [ 
     'Development Status :: Beta', 

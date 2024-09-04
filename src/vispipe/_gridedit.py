@@ -1,6 +1,5 @@
 from __future__ import annotations
 import numpy as np
-import cupy as cp
 
 #[x] split up elements and nodes
 #[x] Optional return for vals
@@ -40,7 +39,7 @@ def tri_bbox_prep(mesh: np.ndarray,
     ywide=(np.max(ynodes)-np.min(ynodes))*.01
     adjust=np.minimum(xwide,ywide)
     adjustedbbox=(bbox[0]-adjust,bbox[1]-adjust,bbox[2]+adjust,bbox[3]+adjust)
-    trimmed=trigridtrim_auto(mesh.triangles,np.vstack((xnodes,ynodes)).transpose(),adjustedbbox,vals=vals)
+    trimmed=trigridtrim(mesh.triangles,np.vstack((xnodes,ynodes)).transpose(),adjustedbbox,vals=vals)
     if np.any(vals):
         mesh.triangles=trimmed[0]
         return mesh,trimmed[1]
@@ -48,24 +47,6 @@ def tri_bbox_prep(mesh: np.ndarray,
         mesh.triangles=trimmed
         return mesh
     
-def trigridtrim_auto(*args,forcecpu=False,**kwargs):
-    """Function to check if CUDA is enabled and choses the CPU or GPU trigridtrim.
-    
-    `forcecpu` : bool = False
-        Force use of CPU trigridtrim.
-
-    Uses args and kwargs for trigridtrim. Designed for deployables that will be used across multiple systems.
-
-    """
-
-    if not forcecpu:
-        try:
-            cp.cuda.runtime.runtimeGetVersion()
-            returnlist=trigridtrim_cuda(*args,**kwargs)
-        except:
-            returnlist=trigridtrim(*args,**kwargs)
-    else: returnlist=trigridtrim(*args,**kwargs)
-    return returnlist
 
 def trigridtrim(elemcomps,nodes,bbox,vals=None,returnindex=False):
     """Funtion to cut out a portion of the elements from a unstructured triangular mesh.
@@ -108,73 +89,6 @@ def trigridtrim(elemcomps,nodes,bbox,vals=None,returnindex=False):
     if returnindex: returnlist.append(bboxindex)
     return returnlist
 
-
-def trigridtrim_cuda(elemcomps,nodes,bbox,vals=None,returnindex=False):
-    """Funtion to cut out a portion of the elements from a unstructured triangular mesh using a CUDA compatable GPU.
-    
-    Parameters
-    ----------
-    `elemcomps` : np.ndarray
-        (m,3) array with indexes to the nodes in the element.
-    `nodes` : np.ndarray
-        `x` and `y` coordinates of mesh with shape (n,2).
-    `bbox` : Iterable
-       Iterable containing x0,y0,x1,y1 where point 0 is the bottem left and point 1 is the top right of the bounding box.
-
-    Returns
-    -------
-    `trimmedelemcomps` : np.ndarray | list
-        Returns the trimmed array of elements or list of arrays based on kwargs.
-
-    Keyword Arguments
-    -----------------
-    `vals` : np.ndarray
-        Z values of nodes.
-    `returnindex` : bool
-        Return the indexs used to cut the original element array.
-
-    """ 
-
-    elemcomps=cp.asarray(elemcomps)
-    nodes=cp.asarray(nodes)
-
-    barycenters=cp.array([(nodes[elemcomps[:,0],0]+nodes[elemcomps[:,1],0]+nodes[elemcomps[:,2],0])/3,(nodes[elemcomps[:,0],1]+nodes[elemcomps[:,1],1]+nodes[elemcomps[:,2],1])/3])
-    bbox_x=cp.where(cp.logical_and(barycenters[0]>=bbox[0],barycenters[0]<=bbox[2]))
-    bbox_y=cp.where(cp.logical_and(barycenters[1]>=bbox[1],barycenters[1]<=bbox[3]))
-    bboxindex=cp.intersect1d(bbox_x,bbox_y).astype(np.int32)
-    
-    if not np.any(vals) and not returnindex: return elemcomps[bboxindex].get()
-    
-    bboxelemcomps=elemcomps[bboxindex]
-    returnlist=[bboxelemcomps.get()]
-
-    if np.any(vals):
-        nodeindex=cp.unique(bboxelemcomps)
-        vals=cp.asarray(vals)
-        returnlist.append(vals[nodeindex].get())
-    if returnindex: returnlist.append(bboxindex.get())
-    return returnlist
-
-
-
-
-def trigridcut_auto(*args,forcecpu=False,**kwargs):
-    """Function to check if CUDA is enabled and choses the CPU or GPU trigridcut.
-    
-    `forcecpu` : bool = False
-        Force use of CPU trigridcut.
-
-    Uses args and kwargs for trigridcut. Designed for deployables that will be used across multiple systems.
-
-    """
-    if not forcecpu:
-        try:
-            cp.cuda.runtime.runtimeGetVersion()
-            returnlist=trigridcut_cuda(*args,**kwargs)
-        except:
-            returnlist=trigridcut(*args,**kwargs)
-    else: returnlist=trigridcut(*args,**kwargs)
-    return returnlist
 
 #Creates a smaller grid from a larger grid.
 def trigridcut(nodes,bbox,elemcomps=None,vals=None,returnindex=False):
@@ -230,73 +144,6 @@ def trigridcut(nodes,bbox,elemcomps=None,vals=None,returnindex=False):
 
     if np.any(vals): returnlist.append(vals[bboxindex])
     if returnindex: returnlist.append(bboxindex)
-    return returnlist
-
-def trigridcut_cuda(nodes,bbox,elemcomps=None,vals=None,returnindex=False):
-    """Funtion to cut out a portion of the x and y coordinates from a unstructured triangular mesh using a CUDA compatable GPU.
-    
-    Parameters
-    ----------
-    `nodes` : np.ndarray
-        `x` and `y` coordinates of mesh with shape (n,2).
-    `bbox` : Iterable
-       Iterable containing x0,y0,x1,y1 where point 0 is the bottem left and point 1 is the top right of the bounding box.
-
-    Returns
-    -------
-    `trimmednodes` : np.ndarray | list
-        Returns the trimmed array of nodes or list of arrays based on kwargs.
-
-    Keyword Arguments
-    -----------------
-    `vals` : np.ndarray
-        Z values of nodes.
-    `elemcomps` : np.ndarray
-        (m,3) array with indexes to the nodes in the element. If present, elemcomps will be trimmed and and re numbered to match new node indexes.
-    `returnindex` : bool
-        Return the indexs used to cut the original element array.
-
-    """  
-
-    nodes=cp.asarray(nodes)
-
-    #Finds the index of the nodes that are between the desired x and y individually then finds the intersection of the two sets.
-    #The cp.logical_and() is limited to three inputs.
-    bbox_x=cp.where(cp.logical_and(nodes[:,0]>=bbox[0],nodes[:,0]<=bbox[2]))
-    bbox_y=cp.where(cp.logical_and(nodes[:,1]>=bbox[1],nodes[:,1]<=bbox[3]))
-    bboxindex=cp.intersect1d(bbox_x,bbox_y).astype(np.int32)
-
-    if not np.any(vals) and not np.any(elemcomps) and not returnindex: return nodes[bboxindex,0:3].get()
-
-    returnlist=[nodes[bboxindex,0:3].get()]
-    if np.any(elemcomps):
-        elemcomps=cp.asarray(elemcomps)
-        
-        #Creates a booleen matrix for elemcomps and then creates a new elementcomp matrix where all three elements are  of elemcomps true.
-        elemcompbool=cp.isin(elemcomps,bboxindex)
-        trimmedelemcomp=elemcomps[elemcompbool[:,0]&elemcompbool[:,1]&elemcompbool[:,2]]
-        
-        #Because bboxelemcomp is cut out from elemcomps, its indexes are not the same as bboxindex. 
-        #cp.nditer is used to iterate through bboxelcomp and sets them to the index of bboxindex to reference them properly. 
-        #This does not work if the bbox has no nodes. I do not care.
-        shift=cp.ElementwiseKernel('T x, raw T y, T length','T z',
-            r"""
-            for (i = 0; i < length; i++){
-                if (x == y[i]){
-                    z=i;
-                    break;
-                }
-            }
-            """,
-            "shift")
-        
-        returnlist.append(shift(trimmedelemcomp,bboxindex,len(bboxindex)).get())
-
-    if np.any(vals): 
-        vals=cp.asarray(vals)
-        returnlist.append(vals[bboxindex].get())
-
-    if returnindex: returnlist.append(bboxindex.get())
     return returnlist
 
 def meshgridcut(mesh,bbox,vals:np.ndarray=None):
