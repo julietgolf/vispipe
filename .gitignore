@@ -1,0 +1,4 @@
+__pycache__/
+test*
+vispipe.egg-info/
+build/
