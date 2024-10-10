@@ -1,3 +1,6 @@
+"""``vispipe._vispipe`` is where the pipeline is executed. All
+members in this submodule are used `directly and exclusively 
+by ``vispipe()`` and ``_pipeline()``."""
 from copy import deepcopy
 from multiprocessing import Pool
 from pint import UnitRegistry
@@ -5,20 +8,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os,shutil,json,fitz,logging
 import importlib
-from meshtools.plotters import stattable
-from ._plot_backend import _MPL_Figure
-
+from .plot_backend import MPL_Figure
+from vispipe._options import voptions 
 
 __all__=["vispipe"]
-
-def _get_settings(*settings):
-    _vp_settings={
-        "dpi":500,
-        "resolution":(3840,2160),
-        "plot_api":_MPL_Figure
-    }
-
-    return tuple(_vp_settings.get(setting) for setting in settings)
 
 #[x] Rough workflow: for keys in config["plots"]: global_settings.update(provided_settings.update(config["global"].update(config["plots"])))
 #[ ] Start with multiplot be in serial then figure out how to get procs to comunicate.
@@ -29,8 +22,14 @@ def _get_settings(*settings):
     #[ ] mesh reader for stwave and use valonly=True
     #[ ] change vispipe to handle multiple grids
     
+def _getfunc(plm):
+    """Imports a function from a package.module.function string."""
+    func=getattr(importlib.import_module(".".join((readlist:=plm.split("."))[:-1])),readlist[-1])
+    return func
+
 #Writes the individule .pngs to a .pdf page.
 def _writepdf(pngpath,width,height):
+    """Adds png to pdf page."""
     file=fitz.open()
     #width and height are in pixels.
     page=file.new_page(width=width,height=height)
@@ -40,6 +39,7 @@ def _writepdf(pngpath,width,height):
 
 #Creates the main pdf from the indiviual pdfs.
 def _orderpdf(title):
+    """Compiles pdf pages into a full document."""
     pages=os.listdir(os.path.join(os.path.dirname(title),"pages"))
     pages=sorted([float(i[:-4]) for i in pages])
     doc=fitz.open()
@@ -48,16 +48,13 @@ def _orderpdf(title):
         doc.insert_pdf(file)
     doc.save(f"{title}")
 
-def _getfunc(plm):
-    func=getattr(importlib.import_module(".".join((readlist:=plm.split("."))[:-1])),readlist[-1])
-    return func
-
 def _merge_func_setting(high,low,key,library={}):
+    """Merges function settings from configs and setting.json."""
     if isinstance(high[key],str):
         high[key]={"name":high[key]}
         high[key].update(library.get(high[key]["name"],{}))
 
-    #[ ] test if a base can have a str name plotter                
+    #[x] test if a base can have a str name plotter                
     if "name" not in high[key]:
         high[key]={**low[key],**high[key]}
         high[key]["kwargs"]={**low[key].get("kwargs",{}),**high[key].get("kwargs",{})}
@@ -68,7 +65,9 @@ def _merge_func_setting(high,low,key,library={}):
     
     return high[key]
 
+#[ ] Make recursive to better facilitate lists.
 def _read_sig(plotter,vals,kwargs,plotargs,plotkwargs,locals,recnumber):
+    """Prepares inputs to the plot function from a sig in the plotter dictionary."""
     plotsig=plotter.pop("sig")
     exclusive=plotsig.pop("exclusive",False)
     par=()
@@ -131,8 +130,9 @@ def _read_sig(plotter,vals,kwargs,plotargs,plotkwargs,locals,recnumber):
 
 #pipeline handes all operations associated with individual plots. 
 def _pipeline(kwargs):
+    """Called by the `Pool` in `vispipe()`. Creates the pngs and pages."""
     try:
-        dpi,(width,height),plot_api=_get_settings("dpi","resolution","plot_api")
+        dpi,(width,height),plot_api=kwargs.pop("dpi"),kwargs.pop("resolution"),kwargs.pop("backend")
         plt.set_loglevel("warning")
         logging.basicConfig(format='%(levelname)s: %(message)s',level=kwargs.pop("loglevel"))
         if "type" in kwargs: del kwargs["type"]
@@ -150,19 +150,13 @@ def _pipeline(kwargs):
         logging.info(f"Preparing plot for fig {pagenumber}")
 
         #Checks for a reader and the assigns vals to be plotted.
-        #[ ] Redo 
+        #[x] Redo 
         if reader:   
             logging.debug("Reading in vals.")     
             readfunc=_getfunc(reader["name"])
             readargs=reader.pop("args",())
             readkwargs=reader.pop("kwargs",{})
             vals=readfunc(path,*readargs,**readkwargs)
-            #if not kwargs.get("mesh"):
-            #    kwargs["mesh"]=(vals[1],)
-            #    if kwargs.get("table"): kwargs["datadims"]=vals[2]
-            #    vals=vals[0]
-            #    reqnum=str(pagenumber).split(".")[-1]
-            #    vals=vals[int(reqnum)]
             logging.debug(f"Fig {pagenumber} vals read.")
         else:
             vals=kwargs.pop("vals")
@@ -212,7 +206,7 @@ def _pipeline(kwargs):
             title=kwargs.pop("titlepre")
 
         if "table" in kwargs:
-            plot: _MPL_Figure=plot_api(pagenumber,subplots=(1,2),title=title,figsize=(width/dpi,height/dpi),layout=kwargs.pop("layout","tight"),subplots_kw=kwargs.pop("subplots_kw",{}))
+            plot: MPL_Figure=plot_api(pagenumber,subplots=(1,2),title=title,figsize=(width/dpi,height/dpi),layout=kwargs.pop("layout","tight"),subplots_kw=kwargs.pop("subplots_kw",{}))
             fig,(table_ax,ax)=plot.return_fig()
             table=kwargs.pop("table")
             tableargs=table.pop("args",())
@@ -221,7 +215,7 @@ def _pipeline(kwargs):
             tableargs,tablekwargs=_read_sig(table,vals,kwargs.copy(),tableargs,tablekwargs,locals(),recnumber)
             tablefunc(*tableargs,**tablekwargs)
         else:
-            plot: _MPL_Figure=plot_api(pagenumber,title=title,figsize=(width/dpi,height/dpi),layout=kwargs.pop("layout","compressed"),subplots_kw=kwargs.pop("subplots_kw",{}))
+            plot: MPL_Figure=plot_api(pagenumber,title=title,figsize=(width/dpi,height/dpi),layout=kwargs.pop("layout","compressed"),subplots_kw=kwargs.pop("subplots_kw",{}))
             fig,(ax,)=plot.return_fig()
 
         
@@ -271,63 +265,6 @@ def _pipeline(kwargs):
             plotargs=((vals,) if not isinstance(vals,tuple) else vals)+kwargs.pop("mesh",())+plotargs
             plotkwargs.update(kwargs)
         else:
-            """ plotsig=plotter.pop("sig")
-            exclusive=plotsig.pop("exclusive",False)
-            par=()
-            pkw={}
-            for key in plotkwargs:
-                plotsig.pop(key,None)
-
-            addargs="vp:plotargs" not in plotsig and "plotargs" in plotter 
-            for key,item in plotsig.copy().items():
-                
-                if "*" in key:
-                    if "**" in key: break
-                    del plotsig[key]
-                    if item is not None:
-                        par+=vals[int(item)] if "vp:" not in str(item) else tuple(kwargs.pop(item[3:],locals().get(item[3:])))
-                    break
-                del plotsig[key]
-
-                if str(item).isdigit():
-                    item=vals[int(item)]
-                    if key=="rec" and recnumber is not None: item=item[recnumber]
-                    par+=(item,)
-                    continue
-                elif isinstance(item,list):
-                    par+=tuple(vals[int(i)] if "vp:" not in str(i) else kwargs.pop(i[3:],locals().get(item[3:])) for i in item)
-                    continue
-                elif isinstance(item,str) and "vp:" in item:
-                    item=kwargs.pop(item[3:],locals().get(item[3:]))
-                    if key=="rec" and recnumber is not None: item=item[recnumber]
-                    par+=(item,)
-                    continue
-            
-            plotargs=par+(plotargs if addargs else ())
-            
-            for key,item in plotsig.items():
-                if "**" in key:
-                    if item is not None and item!="vp:plotkwargs":
-                        pkw.update(vals[int(item)] if "vp:" not in str(item) else tuple(kwargs.pop(item[3:],locals().get(item[3:]))))
-                    elif item=="vp:plotkwargs":
-                        plotkwargs={**pkw, **plotkwargs}
-                        break
-                    else:
-                        break
-                if str(item).isdigit(): 
-                    pkw[key]=vals[int(item)]
-                    continue
-                elif isinstance(item,list):
-                    pkw[key]=tuple(vals[int(i)] if "vp:" not in str(i) else kwargs.pop(i[3:],locals().get(item[3:])) for i in item)
-                    continue
-                elif isinstance(item,str) and "vp:" in item:
-                    pkw[key]=kwargs.pop(item[3:],locals().get(item[3:]))
-                    continue
-            else:
-                plotkwargs={**pkw, **plotkwargs}
-            if not exclusive:
-                plotkwargs.update(kwargs) """
-
             plotargs,plotkwargs=_read_sig(plotter,vals,kwargs,plotargs,plotkwargs,locals(),recnumber)
 
         logging.debug(f"Fig {pagenumber} plotkwargs: {plotkwargs}")
@@ -336,7 +273,6 @@ def _pipeline(kwargs):
         #[x] Custom plot option
         cm=plotfunc(*plotargs,**plotkwargs)
         if useback and "cbar" in plotsettings:
-            print(pagenumber,plotsettings["cbar"])
             plot.cbar(cm,ax=ax,**plotsettings.pop("cbar",) if isinstance(plotsettings["cbar"],dict) else {})
         
         pngpath=os.path.join(savedir,f"pngs/{os.path.basename(path).split('.')[0]+'-' if not pdf else ''}{pagenumber}.png")
@@ -353,32 +289,44 @@ def _pipeline(kwargs):
         
 
 def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
-    """Function to run batch visuilize hydrolic model outputs.
+    """Function to run batch visuilize numerical model outputs.
 
     Parameters
     ----------
-    `config` : str | dict
-        Path to config json file or dictionary.
+    config : str | dict
+        Path to config json file or a config formatted dict.
+
+    image : bool, default=True
+        Deterimins whether pngs dir is saved.
+
+    pdf : bool, default=False
+        Deterimins if a pdf is generated. If True, `image` is set to `not image`.
         
-    Keyword Arguments
-    ------------------
-    `image` : bool=True
-        Deterimins whether pngs dir will be deleted. If False, it is left inplace.
-    `compress` : bool=False
-        Compresses pngs dir to a .tar.gz if true. 
-    `loglevel` : int=30
+    compress : bool, default=False
+        If True, compresses pngs dir to a .tar.gz and `image` is set to `not image`. 
+
+    loglevel : int, default=30
         Log level for logging module.
-        
+    
+    Notes
+    -----
+    If `pdf` and `compress` are `True` `image` will only be `not`ed once. If `image` is set to `False` when either is set to `True`, `images` will be switched to `True`.
+    
     """
-    if pdf: image=not image
+    
+    if pdf or compress: image=not image
 
     logging.debug("Reading universal settings.")
     with open(os.path.join(os.path.dirname(__file__),"settings.json")) as file:
         settings_jason=json.load(file)
+        options_jason=settings_jason.get("options",{})
         format_jason=settings_jason.get("format",{})
         readers_jason=settings_jason.get("readers",{})
         plotters_jason=settings_jason.get("plotters",{})
         universal_jason: dict[str,dict]=settings_jason["universals"]
+
+    if options_jason:
+        voptions.update(options_jason)
 
     if not isinstance(config,dict):
         logging.debug("Reading config.")
@@ -387,6 +335,11 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
             config=json.load(file)
     global_jason=config["globals"]
     plots_jason: dict=config["plots"]
+
+    if "options" in global_jason:
+        voptions.update(global_jason.pop("options"))
+    
+    ncpus=voptions.pop("ncpus")
     
     savedir=global_jason.get("save_path",os.path.abspath(os.curdir))
     if ".pdf"==savedir[-4:]:
@@ -495,12 +448,6 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
 
         plotdict={**universal_jason.get(universalkey,{}),**globkwargs,**globplot}
 
-        #if isinstance(globplot,dict):
-        #    plotdict.update(globplot)
-        #else:
-        #    plotdict.update({"path":globplot})
-        #plotdict.update(globkwargs)
-        
         logging.debug("Updating plot settings.")
         if "reader" in plot:
             plot["reader"]=_merge_func_setting(plot,plotdict,"reader",readers_jason)
@@ -521,6 +468,8 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
         #[x]
         if plotdict["plotter"].get("mesh"):
             logging.debug(f"Adding mesh data from {plotdict['mesh']}.")
+            if plotdict.get("mesh") is None or isinstance(plotdict["mesh"],True):
+                plotdict["mesh"]="grd"
             plotdict["mesh"]=global_jason[plotdict["mesh"]]["vals"]
         elif "mesh" in plotdict:
             del plotdict["mesh"]
@@ -532,9 +481,10 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
             plotdict["defunit"]=universal_jason.get(universalkey)["unit"]
 
         plotdict["pdf"]=pdf
-
+        voptions.set_plot(plotdict)
+        
         logging.debug("Checking minreqs.")
-        minreqs=set(plotdict.pop("minimum"))
+        minreqs=set(plotdict.pop("minimum",plotdict.keys()))
         dif=minreqs-set(plotdict.keys())
         if not dif or "vals" in plotdict and not len(dif)-1:
             logging.debug(f"All minreqs found for {key}.") 
@@ -543,7 +493,7 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
                 logging.debug("Making record specific plots")
                 for dec in range(numreqs):
                     locplotdict={key:item if key not in fields else item[dec] for key,item in plotdict.items()}
-                    locplotdict["pagenumber"]=i+dec*10**-1
+                    locplotdict["pagenumber"]=i+dec/10
                     locplotdict["recnumber"]=dec
 
                     if plotdict.get("defunit"):
@@ -551,7 +501,6 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
                     locplotdict.pop("record_dependent",None)
                     inputs.append(locplotdict)   
                     logging.debug(f"Fig {locplotdict['pagenumber']} kwargs {locplotdict}")
-                
             
             else:
                 plotdict["pagenumber"]=float(i)
@@ -563,7 +512,7 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
         
     #Pool() is a function used in multiprocessing. It creates a pool of functions all running at the same time. This is used in place of a for loop to speed things up drastically. 
     #The time to complete the entire proccess is roughly how long it takes to complete the largest set, instead waiting for all to finish one after the other.
-    with Pool() as pool:
+    with Pool(ncpus) as pool:
         result=pool.map_async(_pipeline,inputs)
         result.wait()
     #This orders the individual pages and saves them as one file before cleaning up the work space.
