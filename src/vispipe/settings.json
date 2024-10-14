@@ -173,6 +173,7 @@
         },
         "wave.out_max":{
             "base": "out_max",
+            
             "plotter":{
                 "sig":{"rec":0,"mesh":1,"*":null}
             },
@@ -190,7 +191,7 @@
                     "titlepre": "STWAVE Associated Mean Wave Period",
                     "crange": false
                 },
-                "directoion":{
+                "direction":{
                     "unit": "deg",
                     "titlepre": "STWAVE Associated Mean Wave Direction",
                     "crange": ["h",0,360]

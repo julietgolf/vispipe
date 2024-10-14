@@ -10,7 +10,7 @@ import os,shutil,json,fitz,logging
 import importlib
 from .plot_backend import MPL_Figure
 from vispipe._options import voptions 
-
+from functools import partial
 __all__=["vispipe"]
 
 #[x] Rough workflow: for keys in config["plots"]: global_settings.update(provided_settings.update(config["global"].update(config["plots"])))
@@ -127,6 +127,60 @@ def _read_sig(plotter,vals,kwargs,plotargs,plotkwargs,locals,recnumber):
     
     return plotargs,plotkwargs
             
+def _squash_level(high,low,readers_jason={},plotters_jason={}):
+    if "reader" in high:
+        high["reader"]=_merge_func_setting(high,low,"reader",readers_jason)
+
+    if "plotter" in high:
+        high["plotter"]=_merge_func_setting(high,low,"plotter",plotters_jason)
+
+    if "stattable" in high:
+        high["stattable"]=_merge_func_setting(high,low,"stattable")
+
+    if "recs" in high or "recs" in low:
+        rhigh=high.get("recs",{})
+        if isinstance(rhigh,list):
+            rhigh=dict.fromkeys(rhigh)
+        elif isinstance(rhigh,str):
+            rhigh={rhigh: None}
+        
+        rlow=low.get("recs")
+
+        if rlow:        
+            if rhigh and isinstance(rlow,dict):
+                for key,rhigh_item in rhigh.items():
+                    rlow_item=rlow.get(key,{})
+                    rlow_item={rli_key:rli_item for rli_key,rli_item in rlow.get(key,{}).items() if rli_key not in high}
+                    if rhigh_item and rlow_item:
+                        rhigh[key]=_squash_level(rhigh_item,rlow_item,readers_jason,plotters_jason) 
+                    elif not rhigh_item:
+                        rhigh[key]=rlow_item
+
+            elif not rhigh:
+                if isinstance(rlow,list):
+                    rlow=dict.fromkeys(rlow)
+                elif isinstance(rlow,str):
+                    rlow={rlow: None}
+                rhigh=rlow
+
+        high["recs"]=rhigh
+
+    return {**low,**high}
+    
+def _parse_file_records(uni_datatype):
+    frecs=uni_datatype.pop("file_records")
+    for i,key in enumerate(frecs):
+        frecs[key]["recnumber"]=i
+    if "recs" in uni_datatype:
+        recs=uni_datatype.pop("recs")
+        if isinstance(recs,list):
+            recs=dict.fromkeys(recs,{})
+        elif isinstance(recs,str):
+            recs={recs: {}}
+        return {rkey:{**frecs[rkey],**recs[rkey]} for rkey in recs}
+    else:
+        return frecs
+    
 
 #pipeline handes all operations associated with individual plots. 
 def _pipeline(kwargs):
@@ -328,6 +382,8 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
     if options_jason:
         voptions.update(options_jason)
 
+    squash_level=partial(_squash_level,readers_jason=readers_jason,plotters_jason=plotters_jason)
+
     if not isinstance(config,dict):
         logging.debug("Reading config.")
         #[ ] add functionality to pass dict.
@@ -349,42 +405,27 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
 
 
     logging.debug("Setting format.")
-    formattype=global_jason.get("format",format_jason["default"]).lower()
+    formattype=global_jason.pop("format",format_jason.get("default")).lower()
     fmtset=set(format_jason["set"])
     for key,settings in universal_jason.items():
         #Selecting proper format settings
-        if fmtset & settings.keys():
+        if formattype and fmtset & settings.keys():
             fmtsettings=settings.pop(formattype,{})
             for delkeys in fmtset-set([formattype]):
                 settings.pop(delkeys,None)
             settings.update(fmtsettings)
+
+        if "file_records" in settings:
+            settings["recs"]=_parse_file_records(settings)
         #Pulling settings from the base 
         #[ ] Try turning this into a for loop
-        if base:=settings.pop("base",False):
-            basesettings=deepcopy(universal_jason[base])
-            if "reader" in settings:
-                settings["reader"]=_merge_func_setting(settings,basesettings,"reader",readers_jason)
-            else:
-                settings["reader"]=basesettings["reader"]
-            
-            if "plotter" in settings:
-                settings["plotter"]=_merge_func_setting(settings,basesettings,"plotter",plotters_jason)
-            else:
-                settings["plotter"]=basesettings["plotter"]
+        if "base" in settings:
+            base=settings.pop("base")
+            if "file_records" in settings:
+                universal_jason[base]["recs"]=_parse_file_records(universal_jason[base])
 
-            if "stattable" in settings:
-                settings["stattable"]=_merge_func_setting(settings,basesettings,"stattable")
-            else:
-                settings["stattable"]=basesettings["stattable"]
-
+            universal_jason[key]=squash_level(settings,universal_jason[base])
             
-            #[ ] test this for a fort.14 not named grd 
-            #[ ] Set up netcdf to use contained grid during plotting
-            #Adding a grd for a netcdf file
-            #if "grd" not in global_jason and key in global_jason and base=="minmax63":
-            #    global_jason["grd"]=key
-            basesettings.update(settings)
-            universal_jason[key]=basesettings
 
     logging.debug(f"Format set to {formattype}.")
     globsets=[(key,item) for key,item in global_jason.items()]
@@ -416,99 +457,99 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
         if not os.path.exists(pagespath): os.mkdir(pagespath)
     
     inputs=[]
+    globkwargs=global_jason.pop("global_kwargs",{})
+
+    logging.debug("Updating global settings.")
+    for globkey,glob in global_jason.items():
+        if globkey in universal_jason:
+            universalkey=globkey
+        elif "type" in global_jason[globkey]:
+            universalkey=global_jason[globkey]["type"]
+        elif "meshtype" in global_jason[globkey]:
+            universalkey=global_jason[globkey]["meshtype"]
+        else:
+            continue
+
+        if isinstance(glob,str):
+            glob={"path":glob}
+        glob=squash_level(glob,universal_jason[universalkey])
+        global_jason[globkey]={**globkwargs,**glob}
+
+
+    logging.debug("Updating plot settings.")
+
     for i,(key,plot) in enumerate(plots_jason.items()):
         logging.debug(f"Making setting plot settings for {key}.")
         logging.debug(f"Setting references.")
         if plot is None: plot={}
         if "type" in plot:
-            globalkey=plot["type"]
+            globkey=plot["type"]
         else:
-            globalkey=key.split(":")[0]
-        #plotdict={}
+            globkey=key.split(":")[0]
         
-        if globalkey in universal_jason:
-            universalkey=globalkey
-        elif "type" in global_jason[globalkey]:
-            universalkey=global_jason[globalkey]["type"]
-        elif "meshtype" in global_jason[globalkey]:
-            universalkey=global_jason[globalkey]["meshtype"]
+        if globkey in universal_jason:
+            universalkey=globkey
+        elif "type" in global_jason[globkey]:
+            universalkey=global_jason[globkey]["type"]
+        elif "meshtype" in global_jason[globkey]:
+            universalkey=global_jason[globkey]["meshtype"]
         else:
             universalkey=None
         
-        logging.debug(f"Reference keys are:\n\tplot: {key}\n\tglobal: {globalkey}\n\tuniversalkey: {universalkey}")
+        logging.debug(f"Reference keys are:\n\tplot: {key}\n\tglobal: {globkey}\n\tuniversalkey: {universalkey}")
 
         logging.debug("Updating universal settings.")
-        #if universalkey: plotdict.update(universal_jason.get(universalkey,{}))
-        
-        logging.debug("Updating global settings.")
-        globplot=global_jason.get(globalkey,{})
-        if isinstance(globplot,str):
-            globplot={"path":globplot}
-        globkwargs=global_jason.get("global_kwargs",{})
-
-        plotdict={**universal_jason.get(universalkey,{}),**globkwargs,**globplot}
-
-        logging.debug("Updating plot settings.")
-        if "reader" in plot:
-            plot["reader"]=_merge_func_setting(plot,plotdict,"reader",readers_jason)
-
-        if "plotter" in plot:
-            plot["plotter"]=_merge_func_setting(plot,plotdict,"plotter",plotters_jason)
-
-        if "stattable" in plot:
-            plot["stattable"]=_merge_func_setting(plot,plotdict,"stattable")
-
-        plotdict={**plotdict,**plot}
+        glob=global_jason.get(globkey,universal_jason.get(universalkey,{}))
+        plotdict=squash_level(plot,glob)
 
         if plotdict.get("table"):
             plotdict["table"]=plotdict.pop("stattable",False)
         elif "stattable" in plotdict:
             del plotdict["stattable"]
 
-        #[x]
-        if plotdict["plotter"].get("mesh"):
-            logging.debug(f"Adding mesh data from {plotdict['mesh']}.")
-            if plotdict.get("mesh") is None or isinstance(plotdict["mesh"],True):
-                plotdict["mesh"]="grd"
-            plotdict["mesh"]=global_jason[plotdict["mesh"]]["vals"]
-        elif "mesh" in plotdict:
-            del plotdict["mesh"]
-
         logging.debug("Adding save path and units.")
-        plotdict["savedir"]=savedir
-        
-        if plotdict.get("unit")!=universal_jason.get(universalkey)["unit"]:
-            plotdict["defunit"]=universal_jason.get(universalkey)["unit"]
 
+        plotdict["savedir"]=savedir
         plotdict["pdf"]=pdf
         voptions.set_plot(plotdict)
-        
-        logging.debug("Checking minreqs.")
-        minreqs=set(plotdict.pop("minimum",plotdict.keys()))
-        dif=minreqs-set(plotdict.keys())
-        if not dif or "vals" in plotdict and not len(dif)-1:
-            logging.debug(f"All minreqs found for {key}.") 
-            plotdict["loglevel"]=loglevel
-            if (numreqs:=plotdict.pop("numreqs",False)) and (fields:=plotdict.pop("record_dependent",False)):
-                logging.debug("Making record specific plots")
-                for dec in range(numreqs):
-                    locplotdict={key:item if key not in fields else item[dec] for key,item in plotdict.items()}
-                    locplotdict["pagenumber"]=i+dec/10
-                    locplotdict["recnumber"]=dec
 
-                    if plotdict.get("defunit"):
-                        locplotdict["defunit"]=plotdict["defunit"][dec]
-                    locplotdict.pop("record_dependent",None)
-                    inputs.append(locplotdict)   
-                    logging.debug(f"Fig {locplotdict['pagenumber']} kwargs {locplotdict}")
-            
+        recs=plotdict.pop("recs",{0:{}})
+        for j,(rkey,rec) in enumerate(recs.items()):
+            if "recnumber" in rec:
+                locplotdict=plotdict.copy()
+                locplotdict["recnumber"]=rec.pop("recnumber")
+
+                locplotdict=squash_level(rec,locplotdict)
             else:
-                plotdict["pagenumber"]=float(i)
-                plotdict.pop("record_dependent",None)
-                inputs.append(plotdict)
-                logging.debug(f"Fig {plotdict['pagenumber']} kwargs {plotdict}")
-        else:
-            logging.error(f"Keys {minreqs - set(plotdict.keys())} are missing for plot {key}. Skipping.")
+                locplotdict=plotdict
+
+            if locplotdict["plotter"].get("mesh"):
+                logging.debug(f"Adding mesh data from {locplotdict['mesh']}.")
+                if locplotdict.get("mesh") is None or isinstance(locplotdict["mesh"],bool):
+                    locplotdict["mesh"]="grd"
+                locplotdict["mesh"]=global_jason[locplotdict["mesh"]]["vals"]
+            elif "mesh" in locplotdict:
+                del locplotdict["mesh"]
+
+            if "unit" in locplotdict:
+                punit=locplotdict["unit"]
+                if "recs" in universal_jason.get(universalkey):
+                    uunit=universal_jason.get(universalkey)["recs"][rkey].get("unit",punit)
+                else:
+                    uunit=universal_jason.get(universalkey).get("unit",punit)
+                if punit!=uunit:
+                    locplotdict["defunit"]=uunit
+
+            logging.debug("Checking minreqs.")
+            minreqs=set(locplotdict.pop("minimum",locplotdict.keys()))
+            dif=minreqs-set(locplotdict.keys())
+            if not dif or "vals" in locplotdict and not len(dif)-1:
+                logging.debug(f"All minreqs found for {key}.") 
+                locplotdict["loglevel"]=loglevel
+                locplotdict["pagenumber"]=i+j/10
+                inputs.append(locplotdict)
+            else:
+                logging.error(f"Keys {minreqs - set(locplotdict.keys())} are missing for plot {key}. Skipping.")
         
     #Pool() is a function used in multiprocessing. It creates a pool of functions all running at the same time. This is used in place of a for loop to speed things up drastically. 
     #The time to complete the entire proccess is roughly how long it takes to complete the largest set, instead waiting for all to finish one after the other.
