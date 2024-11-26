@@ -65,7 +65,6 @@
             },
             "netcdf4": {
                 "reader": "meshtools.file_io.readers.readvalnc"
-                
             },
             "mesh": "grd",
             "plotter":{ 
@@ -87,7 +86,6 @@
         },
         "maxvel": {
             "base": "minmax63",
-            "no_back": false,
             "netcdf4": {
                 "reader_args":["vel_max"]
             },
@@ -161,8 +159,6 @@
             "reader": {"name":"meshtools.file_io.readers.read_stwave_vispipe"},
             "plotter": {
                 "name":"meshtools.pltstwave",
-                
-
                 "kwargs": {
                     "xlabel": "Longitude (deg)",
                     "ylabel": "Latitude (deg)"
@@ -170,7 +166,6 @@
             },
             "no_back":true,
             "minimum": ["reader","plotter","path"],
-            "record_dependent": ["unit","titlepre","crange"],
             "stattable":{
                 "name":"meshtools.plotters.plotters.stattable",
                 "kwargs":{"modeltype":"stwave"}
@@ -178,15 +173,29 @@
         },
         "wave.out_max":{
             "base": "out_max",
-            "unit": ["meter","sec","deg"],
-            "titlepre": ["STWAVE Significant Wave Height", "STWAVE Associated Mean Wave Period","STWAVE Associated Mean Wave Direction"],
-            "numreqs": 3,
-            "crange": [false,false,["h",0,360]],
+            
             "plotter":{
                 "sig":{"rec":0,"mesh":1,"*":null}
             },
             "stattable":{
                 "sig":{"rec":0,"ax":"vp:table_ax","mesh":1,"*":null,"exclusive":true}
+            },
+            "file_records":{
+                "height":{
+                    "unit": "meter",
+                    "titlepre": "STWAVE Significant Wave Height",
+                    "crange": false
+                },
+                "period":{
+                    "unit": "sec",
+                    "titlepre": "STWAVE Associated Mean Wave Period",
+                    "crange": false
+                },
+                "direction":{
+                    "unit": "deg",
+                    "titlepre": "STWAVE Associated Mean Wave Direction",
+                    "crange": ["h",0,360]
+                }
             }
         },
         "Tp.out_max": {

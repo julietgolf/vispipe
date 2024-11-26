@@ -6,7 +6,7 @@ CLASSIFIERS = [
     'Development Status :: Beta', 
     'Intended Audience :: Developers', 
     'Programming Language :: Python', 
-    'Programming Language :: Python :: 3.7+', 
+    'Programming Language :: Python :: 3.9+', 
     ] 
 
 setup(name='vispipe', 
@@ -20,4 +20,10 @@ setup(name='vispipe',
       install_requires=REQUIREMENTS,
       entry_points={"console_scripts":["vispipe=vispipe.vispipe_cli:main"]},
       include_package_data=True
-      ) 
+      )
+
+
+#plot_backend
+#   opt_reader
+#   options
+#   gridedit

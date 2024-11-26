@@ -1,8 +1,37 @@
-import json,os,glob,sys
+import json,os,glob
 from copy import deepcopy
-import argparse
+import numpy
 
-def _opt_reader(opt_path,/,filepre="",titlepre="",fill=True,specname=None,dump=False):
+def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: str="",titlepre: str="",fill: bool=True,specname: dict=None,dump: bool=False) -> dict | None:
+    """Reader to conver opt files into config dictionaries or json files
+
+    Parameters
+    ----------
+    opt_path : str | PathLike | iterable[str| PathLike,...]
+        Path or paths to opt files.
+
+    filepre : str, optional
+        A common file prefix for all output files.
+
+    titlepre : str, optional
+        A common title prefix for all plots.
+
+    fill : bool, default=True
+        Adds missing datatypes to groups from deflist or settings.json
+
+    specname : dict, optional
+        Dictionary used to pass nonstandard file names. Keys are datatypes in the opt file.
+    
+    dump : bool, default=False
+        Writes config to a json file instead of returning it as a dictionary.
+
+    Returns
+    -------
+    dict | None
+        Returns a dictionary to be used by vispipe. If `dump` is true `None` is returned.
+
+    """
+    
     if "opt" in opt_path:
         files=[os.path.abspath(opt_path)]
         run_path=os.path.dirname(files[0])
@@ -13,7 +42,7 @@ def _opt_reader(opt_path,/,filepre="",titlepre="",fill=True,specname=None,dump=F
         run_path=os.path.abspath(opt_path)
         files=glob.glob(os.path.join(run_path,"*_opt*"))
     with open(os.path.join(os.path.dirname(__file__),"settings.json")) as file:
-        opt_opts=json.load(file)["opt"]
+        opt_opts=json.load(file).get("opt",{})
     
 
     config={"globals":{},"plots":{}}
@@ -22,6 +51,8 @@ def _opt_reader(opt_path,/,filepre="",titlepre="",fill=True,specname=None,dump=F
             jason=json.load(opt)
         globals=jason.pop("globals",{})
 
+        #[ ] Change the definition of datatypes so that it looks for "models", then "deflist", and if neither are present just uses the members of globals. The final data_types sho;ud be the union of "models" and "deflist" or the global keys.
+        
         if "models" in jason:
             model_tipe=jason.pop("models")
         else:
@@ -29,7 +60,7 @@ def _opt_reader(opt_path,/,filepre="",titlepre="",fill=True,specname=None,dump=F
 
         data_types={}
         for mt in model_tipe:
-            data_types={**data_types,**opt_opts[mt]}
+            data_types={**data_types,**opt_opts.get(mt,{})}
 
         if "deflist" in globals:
             data_types={tipe:data_types.get(tipe,{}) for tipe in globals.pop("deflist")}
