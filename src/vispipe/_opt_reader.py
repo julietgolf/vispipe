@@ -42,7 +42,7 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         run_path=os.path.abspath(opt_path)
         files=glob.glob(os.path.join(run_path,"*_opt*"))
     with open(os.path.join(os.path.dirname(__file__),"settings.json")) as file:
-        opt_opts=json.load(file)["opt"]
+        opt_opts=json.load(file).get("opt",{})
     
 
     config={"globals":{},"plots":{}}
@@ -51,6 +51,8 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
             jason=json.load(opt)
         globals=jason.pop("globals",{})
 
+        #[ ] Change the definition of datatypes so that it looks for "models", then "deflist", and if neither are present just uses the members of globals. The final data_types sho;ud be the union of "models" and "deflist" or the global keys.
+        
         if "models" in jason:
             model_tipe=jason.pop("models")
         else:
@@ -58,7 +60,7 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
 
         data_types={}
         for mt in model_tipe:
-            data_types={**data_types,**opt_opts[mt]}
+            data_types={**data_types,**opt_opts.get(mt,{})}
 
         if "deflist" in globals:
             data_types={tipe:data_types.get(tipe,{}) for tipe in globals.pop("deflist")}

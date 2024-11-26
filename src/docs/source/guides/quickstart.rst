@@ -24,7 +24,7 @@ This will construct the package and any install any dependencies.
 settings.json
 *************
 
-Next, settings.json must be eddited. This file holds default values for wach datatype. This file is located
+Next, settings.json must be edited. This file holds default values for each datatype. This file is located
 in the Python package under ``vispipe/settings.json``. In settings.json, add the desired datatypes to the 
 ``"universal"`` dictionary. Each datatype will be a key value pair where the key is the datatype name and 
 the value is a dictionary with default settings. These will generally include, the reader function, the 
@@ -120,10 +120,10 @@ their order in the PDF.
 .. seealso::
     :doc:`config` for a more in-depth explination. 
 
-Settings Precedence
-*******************
+Settings Priority
+*****************
 
-3 levels of settings have been described: ``"universal"``, ``"globals"``, and ``"plots"``. These levels are listed in ascending precedence. 
+3 levels of settings have been described: ``"universal"``, ``"globals"``, and ``"plots"``. These levels are listed in ascending priority. 
 This means that any setting defined multiple times will take the value defined the furthest down the list. While not equivilent, this code 
 is descriptive of how settings are updated:
 
@@ -153,7 +153,7 @@ the bread. As long as there are no holes in the bread, it should fall apart when
 Execution
 *********
 
-To execute, either :doc:`vispipe.vispipe</Reference/Vispipe/vispipe.vispipe>` or the built in terminal command :doc:`vispipe</Reference/cli>`. Both 
+To execute, either :doc:`vispipe.vispipe</reference/vispipe/vispipe.vispipe>` or the built in terminal command :doc:`vispipe</reference/cli>`. Both 
 take the path to the config as their first argument, but the function can take a config ``dict`` inplace of the path. Vispipe can out put the plots
 as PNGs, a .tar.gz of the PNGs, or as a PDF using the options below.
 
@@ -180,5 +180,5 @@ as PNGs, a .tar.gz of the PNGs, or as a PDF using the options below.
     is set to ``True``, ``images`` will be switched back to ``True``.
 
 .. seealso::
-    :doc:`vispipe</Reference/cli>` for more information on terminal flags.
+    :doc:`vispipe</reference/cli>` for more information on terminal flags.
 

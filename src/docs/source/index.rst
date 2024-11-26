@@ -15,4 +15,7 @@ documentation for details.
    :maxdepth: 2
 
    guides/index
-   Reference/index
+   reference/index
+
+
+.. rst:directive:: test_dir

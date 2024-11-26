@@ -23,7 +23,7 @@ Sections
 "universal" and Datatypes
 -------------------------
 
-The members of ``"universal"`` are the indivdual datatypes that `vispipe` can plot. The settings defined in each
+The members of ``"universal"`` are the indivdual datatypes that ``vispipe`` can plot. The settings defined in each
 datatype are the lowest priority settings, if they are defined in a config or opt they will be overwritten.
 
 .. code-block:: JSON
@@ -61,6 +61,55 @@ datatype are the lowest priority settings, if they are defined in a config or op
 
 The above example is intentionally robust to be used as a demonstarot for the rest of the guide. In a real
 ``settings.json`` much of the above can be simplified. 
+
+.. _file_recs:
+
+File Records
+^^^^^^^^^^^^
+
+Files that contain multiple datatypes with different settings requirments are accounted for with the ``"file_records"`` 
+field. This field is a ``dict[dict]`` where each record of the file is described by a subdictionary named by 
+the subdatatype. The subdictionaries are formatted the same as normal datatypes and is weighted .5 more in priority 
+than its parent. This means it will overwrite setting that it has in common with its parent datatype, but not a setting
+defined in the config file. 
+
+If the reader function outputs all records at once, the members of ``"file_records"`` should be in the same order. Their
+order also determinse the order they will be placed into a PDF if generated. To change this order or to only plot a 
+subset of the records, a field ``"recs"`` consisting of a ``str`` or ``list[str]``, where the ``str`` is a keyword in 
+``"file_records"``, can be added to the datatype. 
+
+.. code-block:: JSON 
+    :caption: An example from STWAVE. ``"recs"`` will cause ``"direction"``, then ``"height"``, but not ``"period"`` to be plotted.
+
+    "wave.out_max":{
+        "base": "out_max",
+        
+        "plotter":{
+            "sig":{"rec":0,"mesh":1,"*":null}
+        },
+        "stattable":{
+            "sig":{"rec":0,"ax":"vp:table_ax","mesh":1,"*":null,"exclusive":true}
+        },
+        "recs": ["direction","height"]
+        "file_records":{
+            "height":{
+                "unit": "meter",
+                "titlepre": "STWAVE Significant Wave Height",
+                "crange": false
+            },
+            "period":{
+                "unit": "sec",
+                "titlepre": "STWAVE Associated Mean Wave Period",
+                "crange": false
+            },
+            "direction":{
+                "unit": "deg",
+                "titlepre": "STWAVE Associated Mean Wave Direction",
+                "crange": ["h",0,360]
+            }
+        }
+    }
+    
 
 ``"base"`` Datatypes
 ^^^^^^^^^^^^^^^^^^^^
@@ -181,10 +230,13 @@ The ``"options"`` field is used to change the settings in ``vispipe._options._Op
       - The plot backend used by vispipe.
       - ``str`` formatted "[modules,...].backend"
 
+
+.. _uni_opt:
+
 "opt"
 -----
 
-The models that opt files should look for is defined here. ``"opt"`` is a nested dictionary with 3
+The models that :func:`vispipe.opt_reader` should look for is defined here. ``"opt"`` is a nested dictionary with 3
 levels. The top level are the names of the models, the middle is the datatypes in that model, and
 the bottem are settings for ``vispipe.opt_reader()``. The only current setting at the lowest level
 is ``"file_base"``, which is the base name of the data file if it is not the datatype name.

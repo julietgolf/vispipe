@@ -1,7 +1,6 @@
 """``vispipe._vispipe`` is where the pipeline is executed. All
 members in this submodule are used `directly and exclusively 
 by ``vispipe()`` and ``_pipeline()``."""
-from copy import deepcopy
 from multiprocessing import Pool
 from pint import UnitRegistry
 import matplotlib.pyplot as plt
@@ -17,10 +16,6 @@ __all__=["vispipe"]
 #[ ] Start with multiplot be in serial then figure out how to get procs to comunicate.
 #[ ] lru_cache for vals that have been read already.
 #[ ] make better logger
-#[ ] Look at righting a mesh reader for stwave and use valonly=True when doing the main read.
-    #[x] make mesh reader 
-    #[ ] mesh reader for stwave and use valonly=True
-    #[ ] change vispipe to handle multiple grids
     
 def _getfunc(plm):
     """Imports a function from a package.module.function string."""
@@ -482,10 +477,10 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
         logging.debug(f"Making setting plot settings for {key}.")
         logging.debug(f"Setting references.")
         if plot is None: plot={}
-        if "type" in plot:
+        """ if "type" in plot:
             globkey=plot["type"]
-        else:
-            globkey=key.split(":")[0]
+        else: """
+        globkey=key.split(":")[0]
         
         if globkey in universal_jason:
             universalkey=globkey

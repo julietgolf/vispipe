@@ -11,7 +11,7 @@ At the top level ``vispipe`` provides 2 functions ``vispipe()`` and  ``opt_reade
 for ``vispipe`` to be placed into scripted workflows written in Python. 
 
 .. autosummary::
-    :toctree: Vispipe
+    :toctree: vispipe
 
     vispipe
     opt_reader
