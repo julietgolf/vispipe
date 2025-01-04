@@ -805,7 +805,6 @@ class MPL_Figure(_vispipe_backend_api):
             
         plt.show(*args,**kwargs) """
 
-    #[x] Make save
     def savefig(self,path,dpi=None):
         """Calls `fig.savefig()`.
         

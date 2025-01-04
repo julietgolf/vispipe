@@ -4,7 +4,7 @@ Getting Started
 The goal of this guide is to install, setup, and run vispipe. 
 
 .. note::
-    All JSON types will be referred to by there equivilent Python types for simplicity except for ``null``. 
+    This page applies to both ``dict`` types and JSON types. All types will be referred to by there Python types for simplicity except for ``null``.
 
 Installation
 ************
@@ -60,8 +60,8 @@ any dynamically defined args. ``"kwargs"`` is a ``dict`` of predefined kwargs. I
         }
 
 .. note::
-    If VisPipe is not installed in a virtual enviroment and the site-packages folder of the python enviroment 
-    requires super user privalges, settings.json can be editted by editting in the source before installing. 
+    If VisPipe is not installed in a virtual environment and the site-packages folder of the python environment 
+    requires super user privileges, settings.json can be edited by editing in the source before installing. 
 
 .. seealso::
     :doc:`settings` for more details on settings.json.
@@ -77,7 +77,7 @@ are needed for that datatype, then just the path can be given in place of the di
 to a member in ``"universal"``. If ``"type"`` is added with the name of the relevant ``"universal"`` to the datatypes
 ``"globals"`` dictionary, its key can be anything.
 
-The ``"plots"`` field conatains the settings specific to each plot. This is the final level of settings needed to 
+The ``"plots"`` field contains the settings specific to each plot. This is the final level of settings needed to 
 make plots. Each member of ``"plots"`` is for all intents and purposes a plot. The key for the plot should be a 
 reference to a member in ``"globals"``. If multiple plots of the same data are needed, append ``":*"`` to the end of 
 the key. What follows the colon is unimportant, just that it makes the key unique. If no settings need to be defined
@@ -118,13 +118,13 @@ their order in the PDF.
     }
 
 .. seealso::
-    :doc:`config` for a more in-depth explination. 
+    :doc:`config` for a more in-depth explanation. 
 
 Settings Priority
 *****************
 
 3 levels of settings have been described: ``"universal"``, ``"globals"``, and ``"plots"``. These levels are listed in ascending priority. 
-This means that any setting defined multiple times will take the value defined the furthest down the list. While not equivilent, this code 
+This means that any setting defined multiple times will take the value defined the furthest down the list. While not equivalent, this code 
 is descriptive of how settings are updated:
 
 .. code-block:: python
@@ -145,9 +145,9 @@ is descriptive of how settings are updated:
 Each time plot_kwargs is updated, any keywords in the updater and not in plot_kwargs are added. Any keywords in both the updater and plot_kwargs 
 have their value changed in plot_kwargs. With a few exceptions, any setting can be defined at any level. 
 
-A useful visulization is swiss cheese. A piece of bread represents a functions keyword arguments and swiss cheese represents a settings level. 
-When slice is layed on the bread, The bread will be coverd, but some of the swiss' holes will show the bread below. When another slice is placed,
-some of the first slice and bread will be visable. Finally, the third slice will cover some and show some of the second slice, third slice, and 
+A useful visualization is swiss cheese. A piece of bread represents a functions keyword arguments and swiss cheese represents a settings level. 
+When slice is laid on the bread, The bread will be covered, but some of the swiss' holes will show the bread below. When another slice is placed,
+some of the first slice and bread will be visible. Finally, the third slice will cover some and show some of the second slice, third slice, and 
 the bread. As long as there are no holes in the bread, it should fall apart when picked up.
 
 Execution
@@ -180,5 +180,5 @@ as PNGs, a .tar.gz of the PNGs, or as a PDF using the options below.
     is set to ``True``, ``images`` will be switched back to ``True``.
 
 .. seealso::
-    :doc:`vispipe</reference/cli>` for more information on terminal flags.
+    :doc:`Vispipe CLI</reference/cli>` for more information on terminal flags.
 

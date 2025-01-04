@@ -66,6 +66,7 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
             data_types={tipe:data_types.get(tipe,{}) for tipe in globals.pop("deflist")}
 
         global_kwargs=globals.get("global_kwargs",{})
+        fill=global_kwargs.pop("fill",fill)
         for tipe,settings in data_types.items():
             if specname and tipe in specname:
                 output_path=f"{run_path}/{specname[tipe]}"#.format(run_path=run_path,filename=)
@@ -84,7 +85,6 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
             group_type=key.split(":")[0]
             group_item=(group.pop("group") if group_type=="group" else {group_type:group.pop(group_type)}) if group_type!="default" else None
             do_fill=group.pop("fill",fill)
-            #[x]
             titlepre=titlepre.replace("\\n","\n") if titlepre else data_types.get("titlepre","")
             
             for plotkey,plotitem in group.items():
@@ -116,7 +116,6 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         for key,cnt in plotcount.items(): 
             if not cnt: del config["globals"][key]
 
-        #[x] keep in mem option
         if not dump:
             return config
         else:

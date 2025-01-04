@@ -9,6 +9,5 @@ The internal functions and classes VisPipe uses are detailed in the following do
     
     vispipe
     settings
-    settings_priority
     plot_backend
     cli

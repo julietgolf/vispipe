@@ -5,11 +5,6 @@
 from __future__ import annotations
 import numpy as np
 
-#[x] split up elements and nodes
-#[x] Optional return for vals
-#[x] Switch to berrycenter search instead of node search
-#[x] move into plotters 
-#[x] Move out widen to plotters
 #[ ] Make a parent function for tri functions with kwarg mode={"cpu","gpu","auto"} that passes to proper function.
 def tri_bbox_prep(mesh: np.ndarray,
                    bbox: tuple[float,float,float,float],

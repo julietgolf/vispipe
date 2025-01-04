@@ -15,7 +15,7 @@ Each section is a JSON ``object`` type which translate to Python ``dict`` type. 
 optional. However, the more robust ``settings.json`` the simpler config and opt files will be to write
 
 .. note::
-    All JSON types will be referred to by there equivilent Python types for simplicity except for ``null``. 
+    This page applies to both ``dict`` types and JSON types. All types will be referred to by there Python types for simplicity except for ``null``.
 
 Sections
 ========
@@ -23,7 +23,7 @@ Sections
 "universal" and Datatypes
 -------------------------
 
-The members of ``"universal"`` are the indivdual datatypes that ``vispipe`` can plot. The settings defined in each
+The members of ``"universal"`` are the individual datatypes that ``vispipe`` can plot. The settings defined in each
 datatype are the lowest priority settings, if they are defined in a config or opt they will be overwritten.
 
 .. code-block:: JSON
@@ -59,7 +59,7 @@ datatype are the lowest priority settings, if they are defined in a config or op
             "extend":"both"
         }
 
-The above example is intentionally robust to be used as a demonstarot for the rest of the guide. In a real
+The above example is intentionally verbose to be used as a demonstrate for the rest of the guide. In a real
 ``settings.json`` much of the above can be simplified. 
 
 .. _file_recs:
@@ -67,14 +67,14 @@ The above example is intentionally robust to be used as a demonstarot for the re
 File Records
 ^^^^^^^^^^^^
 
-Files that contain multiple datatypes with different settings requirments are accounted for with the ``"file_records"`` 
+Files that contain multiple datatypes with different settings requirements are accounted for with the ``"file_records"`` 
 field. This field is a ``dict[dict]`` where each record of the file is described by a subdictionary named by 
 the subdatatype. The subdictionaries are formatted the same as normal datatypes and is weighted .5 more in priority 
 than its parent. This means it will overwrite setting that it has in common with its parent datatype, but not a setting
 defined in the config file. 
 
 If the reader function outputs all records at once, the members of ``"file_records"`` should be in the same order. Their
-order also determinse the order they will be placed into a PDF if generated. To change this order or to only plot a 
+order also determines the order they will be placed into a PDF if generated. To change this order or to only plot a 
 subset of the records, a field ``"recs"`` consisting of a ``str`` or ``list[str]``, where the ``str`` is a keyword in 
 ``"file_records"``, can be added to the datatype. 
 
@@ -171,11 +171,11 @@ where the value is another member of ``"universals"``.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If a plotter requires a mesh to plot data against, the datatype being plotted points to the mesh with the keyword 
-``"mesh"`` where the value is the datatype name of the mesh. Alternativlly, if ``"mesh"`` is missing or set to ``True``,
+``"mesh"`` where the value is the datatype name of the mesh. Alternatively, if ``"mesh"`` is missing or set to ``True``,
 the ``"grd"`` datatype is treated as the default mesh.
 
-Type Aliassing
-^^^^^^^^^^^^^^
+Type Aliasing
+^^^^^^^^^^^^^
 
 By default, the key used in a config is used to search ``"universal"`` settings. This does not work when there are 
 multiple sets of data of the same datatype since this would cause a naming conflict. 
@@ -184,7 +184,7 @@ multiple sets of data of the same datatype since this would cause a naming confl
 ------------------------
 
 In these sections, reader and plotting functions can be defined so they can be reused in datatypes. The keys for the
-indivdual function dictionaries are what would normally be in the ``"name"`` field. 
+individual function dictionaries are what would normally be in the ``"name"`` field. 
 
 
 "format"
@@ -216,7 +216,7 @@ The ``"options"`` field is used to change the settings in ``vispipe._options._Op
 
     * - Name
       - Description
-      - Requirment
+      - Requirement
     * - ``"ncpu"``
       - Number of CPUs used by ``multiprocessing.Pool``.
       - ``int`` or ``str(int)``
@@ -238,7 +238,7 @@ The ``"options"`` field is used to change the settings in ``vispipe._options._Op
 
 The models that :func:`vispipe.opt_reader` should look for is defined here. ``"opt"`` is a nested dictionary with 3
 levels. The top level are the names of the models, the middle is the datatypes in that model, and
-the bottem are settings for ``vispipe.opt_reader()``. The only current setting at the lowest level
+the bottom are settings for ``vispipe.opt_reader()``. The only current setting at the lowest level
 is ``"file_base"``, which is the base name of the data file if it is not the datatype name.
 
 .. _CSTORM: https://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476697/

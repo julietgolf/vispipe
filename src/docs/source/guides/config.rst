@@ -7,7 +7,7 @@ plotted, and the settings used to plot them are defined. Configs can be either a
 ``"globals"`` and ``"plots"`` 
 
 
-#. :data:`globals`
+#. :ref:`"globals"`
 #. :ref:`"plots"`
 
 .. note::
@@ -31,7 +31,7 @@ The config is ``dict`` with two sub-dictionaries, ``"globals"`` and ``"plots"``.
         }
     }
 
-.. _globals:
+.. _config_globals:
 
 "globals"
 ---------
@@ -143,7 +143,7 @@ the data can be passed directly into ``vispipe()`` using the ``"vals"`` keyword.
 Plotting with Multiple Records
 ==============================
 
-Datatypes whose ``"universal"`` has a :ref:`"file_recs"<file_recs>` field can be changed using the ``"recs"`` keyword from
+Datatypes whose ``"universal"`` has a :ref:`"file_records"<file_recs>` field can be changed using the ``"recs"`` keyword from
 either ``"plots"`` or ``"universals"``. The value of ``"recs"`` can take the form of a ``str``, ``list[str]``, or ``dict``. ``
 When in the form of a ``str`` or ``list``, recs acts a filter. Not changing any settings, but rather it determines what records
 to plot and what order to plot them in. In the form of a ``dict``, ``"recs"`` will also change the settings. 

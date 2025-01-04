@@ -4,7 +4,7 @@ Vispipe Terminal Command
 
 Vispipe comes with a built in terminal command that allows for vispipe to be called from outside a Python script.
 The command has fa number of flags that control the kwargs of ``vispipe()``. Additionally, ``vispipe -o`` and 
-associated flags allows for .opt files to be read dirrectly.
+associated flags allows for .opt files to be read directly.
 
 
 ``vispipe()`` kwarg flags
@@ -39,6 +39,8 @@ associated flags allows for .opt files to be read dirrectly.
       - store_const, 10
       - Show debugging messages.
       - 30
+
+.. _opt_cli:
 
 ``opt_reader()`` kwarg flags
 ****************************

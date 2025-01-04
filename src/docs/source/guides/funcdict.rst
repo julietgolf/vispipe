@@ -1,7 +1,7 @@
 Adding Custom Functions
 ***********************
 
-Vispipe allows the user to add custom readers, plotters, and stattables. Thes functions are contained in function 
+Vispipe allows the user to add custom readers, plotters, and stattables. These functions are contained in function 
 dictionaries. They are placed in a datatype in either the config file or the ``settings.json`` with the keys "readers",
 "plotters", or "stattables". 
 
@@ -16,7 +16,7 @@ plotting process and ``"sig"``, which is shared with stattables dictionaries, ma
 input of the plotter or stattable. 
 
 .. code-block:: JSON
-    :caption: Function dictionary for a genneric plotter.
+    :caption: Function dictionary for a generic plotter.
 
     "plotter": {
         "name": "module.plotter",
@@ -29,8 +29,8 @@ input of the plotter or stattable.
 ``"sig"``
 ^^^^^^^^^
 
-``"sig"`` is a dictionary that discribes the input of the plotter or stattable. The ``"sig"`` dictionaries are parsed by 
-``vispipe._vispipe._read_sig()`` which maps the output of the reader, config, and local variables to their propper position
+``"sig"`` is a dictionary that describes the input of the plotter or stattable. The ``"sig"`` dictionaries are parsed by 
+``vispipe._vispipe._read_sig()`` which maps the output of the reader, config, and local variables to their proper position
 in the input args and kwargs. Other than the keys in the table below, keys in this dictionary are for readability only. 
 
 
@@ -80,15 +80,15 @@ Internally, the reader outputs to a variable named ``vals``. If the reader has m
         }
 
 .. warning:: 
-    ``"args"`` can cause conflicts with ``"sig"`` when ``*args`` is not present in the function's signiture. This 
-    generally occures in 2 ways. If a function limits the number of positional arguments with ``*`` in its signiture,
+    ``"args"`` can cause conflicts with ``"sig"`` when ``*args`` is not present in the function's signature. This 
+    generally occurs in 2 ways. If a function limits the number of positional arguments with ``*`` in its signature,
     a ``TypeError`` can be triggered by passing too many positional arguments. When ``*`` is absent, the members of 
     ``"args"`` can role into keyword arguments. This has the potential to cause a ``SyntaxError`` if a keyword is 
     defined somewhere else.
 
-Inheritence
+Inheritance
 ^^^^^^^^^^^
 
-Inheritence on function dictionaries works much the same way as datatype inheritence in config files. If a datatype 
-higher in the stack has a function defined that shares a name with one defined lower, the ``"kwargs"`` will inherite 
-any ``"kwargs"`` lower in the stack that are undefined. All other fields are dirrectly inherited.
+Inheritance on function dictionaries works much the same way as datatype inheritance in config files. If a datatype 
+higher in the stack has a function defined that shares a name with one defined lower, the ``"kwargs"`` will inherit 
+any ``"kwargs"`` lower in the stack that are undefined. All other fields are directly inherited.

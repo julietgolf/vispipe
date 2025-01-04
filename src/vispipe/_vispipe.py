@@ -12,7 +12,6 @@ from vispipe._options import voptions
 from functools import partial
 __all__=["vispipe"]
 
-#[x] Rough workflow: for keys in config["plots"]: global_settings.update(provided_settings.update(config["global"].update(config["plots"])))
 #[ ] Start with multiplot be in serial then figure out how to get procs to comunicate.
 #[ ] lru_cache for vals that have been read already.
 #[ ] make better logger
@@ -49,7 +48,6 @@ def _merge_func_setting(high,low,key,library={}):
         high[key]={"name":high[key]}
         high[key].update(library.get(high[key]["name"],{}))
 
-    #[x] test if a base can have a str name plotter                
     if "name" not in high[key]:
         high[key]={**low[key],**high[key]}
         high[key]["kwargs"]={**low[key].get("kwargs",{}),**high[key].get("kwargs",{})}
@@ -199,7 +197,6 @@ def _pipeline(kwargs):
         logging.info(f"Preparing plot for fig {pagenumber}")
 
         #Checks for a reader and the assigns vals to be plotted.
-        #[x] Redo 
         if reader:   
             logging.debug("Reading in vals.")     
             readfunc=_getfunc(reader["name"])
@@ -269,7 +266,6 @@ def _pipeline(kwargs):
 
         
         #Preps args and kwargs for the plot
-        #[x] Make option for custom or backend
         plotsettings={key:kwargs.pop(key) for key in kwargs.copy() if key in ("subtitle","xlabel","ylabel","xticks","yticks","aspect","grid","bbox","set","cbar")}
         
         if useback:
@@ -307,9 +303,6 @@ def _pipeline(kwargs):
         plotkwargs=plotter.pop("kwargs",{})
 
         #sets up plot kw/args
-        #[x] tuple vals might be legacy. Check
-        #[x] Redo for non mesh based funcs
-            #[x] Consider a mesh bool in the settings.
         if "sig" not in plotter:
             plotargs=((vals,) if not isinstance(vals,tuple) else vals)+kwargs.pop("mesh",())+plotargs
             plotkwargs.update(kwargs)
@@ -319,7 +312,6 @@ def _pipeline(kwargs):
         logging.debug(f"Fig {pagenumber} plotkwargs: {plotkwargs}")
         logging.debug(f"Plotting fig {pagenumber}.")
 
-        #[x] Custom plot option
         cm=plotfunc(*plotargs,**plotkwargs)
         if useback and "cbar" in plotsettings:
             plot.cbar(cm,ax=ax,**plotsettings.pop("cbar",) if isinstance(plotsettings["cbar"],dict) else {})
@@ -381,7 +373,6 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
 
     if not isinstance(config,dict):
         logging.debug("Reading config.")
-        #[ ] add functionality to pass dict.
         with open(config) as file:
             config=json.load(file)
     global_jason=config["globals"]
