@@ -4,3 +4,4 @@ vispipe.egg-info/
 build/
 dist/
 Pipfile
+_*/
