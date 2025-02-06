@@ -22,17 +22,15 @@ def main():
 
     if args.swap_settings:
         path=os.path.dirname(os.path.abspath(__file__))
-        print(os.path.abspath(__file__))
         settings=os.path.join(path,"settings.json")
         shutil.move(settings,os.path.join(path,f"{len(os.listdir(path))-4}_settings.json"))
-        newsettings=os.path.abspath(args.config)
+        newsettings=os.path.abspath(*args.config)
         shutil.copy2(newsettings,settings)
     else:    
         try:
             if args.opts:
                 if args.specname: args.specname={ key:val for key,val in zip(args.specname[::2],args.specname[1::2]) }
                 args.config=[opt_reader(args.config,**{"filepre":args.filepre,"titlepre":args.titlepre,"fill":args.nofill,"specname":args.specname,"dump":args.dump})]
-                print(args.config)
                 if args.config[0] is None:
                     exit()
             vispipe(*args.config,**{"image":args.image,"pdf":args.pdf,"compress":args.compress,"loglevel":args.verbose})
