@@ -51,8 +51,6 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
             jason=json.load(opt)
         globals=jason.pop("globals",{})
 
-        #[ ] Change the definition of datatypes so that it looks for "models", then "deflist", and if neither are present just uses the members of globals. The final data_types sho;ud be the union of "models" and "deflist" or the global keys.
-        
         if "models" in jason:
             model_tipe=jason.pop("models")
         else:
@@ -72,6 +70,7 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
                 output_path=f"{run_path}/{specname[tipe]}"#.format(run_path=run_path,filename=)
             else:
                 output_path=f"{run_path}/{filepre+'_' if filepre else ''}{settings.get('file_base',tipe)}"#.format(run_path=run_path,filepre=filepre,tipe=tipe,tail=tail)
+
             globals_settings=globals.get(tipe,{})
             globals_settings["path"]=output_path
 
@@ -82,6 +81,8 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         plotcount={ data_type:0 for data_type in data_types}
         
         for key,group in jason.items():
+            if group is None:
+                group={}
             group_type=key.split(":")[0]
             group_item=(group.pop("group") if group_type=="group" else {group_type:group.pop(group_type)}) if group_type!="default" else None
             do_fill=group.pop("fill",fill)
@@ -97,7 +98,6 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
                     plot_params.update(plotitem)
                 else:
                     plot_params=plotitem
-
                 
                 fin_title=f"{titlepre+' ' if titlepre and 'title' in plot_params else titlepre}{plot_params.get('title','')}"#.format(titlepre=titlepre,title=plot_params.get('title'))
                 if fin_title: plot_params["title"]=fin_title
