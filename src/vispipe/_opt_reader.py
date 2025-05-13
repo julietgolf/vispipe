@@ -45,6 +45,7 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         else:
             run_path=os.path.abspath(opt_path[0])
         files=glob.glob(os.path.join(run_path,"*_opt*"))
+
     with open(os.path.join(os.path.dirname(__file__),"settings.json")) as file:
         opt_opts=json.load(file).get("opt",{})
     
@@ -120,10 +121,10 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         for key,cnt in plotcount.items(): 
             if not cnt: del config["globals"][key]
 
-        if not dump:
-            return config
-        else:
-            jsonpath=f"{run_path}/{filepre+'_' if filepre else ''}vispipe.json"#.format(run_path=run_path,filepre=filepre)
-            with open(jsonpath,"w") as configjason:
-                json.dump(config,configjason,indent=4)
+    if not dump:
+        return config
+    else:
+        jsonpath=f"{run_path}/{filepre+'_' if filepre else ''}vispipe.json"#.format(run_path=run_path,filepre=filepre)
+        with open(jsonpath,"w") as configjason:
+            json.dump(config,configjason,indent=4)
 
