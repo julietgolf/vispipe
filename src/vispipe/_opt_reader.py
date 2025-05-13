@@ -41,7 +41,7 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         run_path=os.path.dirname(files[0])
     else:
         if not opt_path:
-            opt_path=os.getcwd()
+            run_path=os.getcwd()
         else:
             run_path=os.path.abspath(opt_path[0])
         files=glob.glob(os.path.join(run_path,"*_opt*"))
