@@ -32,10 +32,11 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
 
     """
     
+    #[ ] Redo this
     if "opt" in opt_path:
         files=[os.path.abspath(opt_path)]
         run_path=os.path.dirname(files[0])
-    elif hasattr(opt_path,"__iter__"):
+    elif hasattr(opt_path,"__iter__") and len(opt_path):
         files=[os.path.abspath(op) for op in opt_path]
         run_path=os.path.dirname(files[0])
     else:
