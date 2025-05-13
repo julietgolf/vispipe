@@ -40,7 +40,10 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
         files=[os.path.abspath(op) for op in opt_path]
         run_path=os.path.dirname(files[0])
     else:
-        run_path=os.path.abspath(opt_path)
+        if not opt_path:
+            opt_path=os.getcwd()
+        else:
+            run_path=os.path.abspath(opt_path[0])
         files=glob.glob(os.path.join(run_path,"*_opt*"))
     with open(os.path.join(os.path.dirname(__file__),"settings.json")) as file:
         opt_opts=json.load(file).get("opt",{})
