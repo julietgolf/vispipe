@@ -490,9 +490,11 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
 
         if plotdict.get("table"):
             plotdict["table"]=plotdict.pop("stattable",False)
-        elif "stattable" in plotdict:
-            del plotdict["stattable"]
-
+        else:
+            if "stattable" in plotdict:
+                del plotdict["stattable"]
+            if "table" in plotdict:
+                del plotdict["table"]
         logging.debug("Adding save path and units.")
 
         plotdict["savedir"]=savedir
