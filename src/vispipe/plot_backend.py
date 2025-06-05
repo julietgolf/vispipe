@@ -456,7 +456,7 @@ class MPL_Figure(_vispipe_backend_api):
             
     #[ ]Utilize bbox's to trim all data types.
     #[ ]Rework to include standard ax.plot() call sigs.
-    def line(self,points,*args,T=True,ax=None,**linekwargs):
+    def line(self,points,*args,T=False,ax=None,**linekwargs):
         """Calls ax.plot()
         
         Parameters
@@ -489,10 +489,11 @@ class MPL_Figure(_vispipe_backend_api):
             self.sca(ax)
         if T:
             points=points.T
+
         return ax.plot(*points,*args,**linekwargs)
     
     #[ ]Rework to include standard ax.scatter() call sigs.
-    def scatter(self,points,*args,T=True,ax=None,**scatterkwargs):
+    def scatter(self,points,*args,T=False,cmap=None,ax=None,**scatterkwargs):
         """Calls ax.scatter()
         
         Parameters
@@ -502,6 +503,9 @@ class MPL_Figure(_vispipe_backend_api):
 
         T : bool, default=True
             If `True` the points array is transposed. Used for arrays with shape (n,2).
+
+        cmap : str
+            Colors scatter points with the given cmap. If \"c\" is not in **scatterkwargs, the y data is used for the z data.
 
         ax : Axes | None, optional
             `Axes` to plot onto. If `None` self.gca() is called.
@@ -525,6 +529,12 @@ class MPL_Figure(_vispipe_backend_api):
 
         if T:
             points=points.T
+        
+        if cmap:
+            if "c" not in scatterkwargs:
+                scatterkwargs["c"]=points[1]
+            scatterkwargs["cmap"]=cmap
+
         return ax.scatter(*points,*args,**scatterkwargs)
 
     #[ ] def line3d():

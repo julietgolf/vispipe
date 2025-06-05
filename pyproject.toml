@@ -12,7 +12,8 @@ dependencies = [
     "pint",
     "PyMuPDF",
     "netCDF4",
-    "matplotlib"
+    "matplotlib",
+    "pyproj>=3.6.1",
 ]
 
 
@@ -22,3 +23,10 @@ vispipe="vispipe.vispipe_cli:main"
 [build-system]
 requires = ["setuptools >= 59.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["vispipe","vispipe.example"]
+
+
+[tool.setuptools.package-data]
+"*" = ["*.npz", "*.json"]

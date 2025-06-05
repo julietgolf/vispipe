@@ -10,6 +10,8 @@ pip install vispipe
 
 ## Getting started
 
+For an example data and config run the function `vispipe.example.get_example()`.
+
 Included in VisPipe are the sphinx source files for the documentation. To build run the following commands:
 ```
 pip install sphinx numpydoc sphinx_autodoc_typehints pydata_sphinx_theme

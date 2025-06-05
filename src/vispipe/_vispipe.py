@@ -227,7 +227,7 @@ def _pipeline(kwargs):
                     kwargs["cbar"]={"label":kwargs.pop("unit")}
                 elif "label" not in kwargs["cbar"]: 
                     kwargs["cbar"]["label"]=kwargs.pop("unit")
-            else:
+            elif "unit" in kwargs:
                 del kwargs["unit"]
 
         except:
@@ -250,6 +250,8 @@ def _pipeline(kwargs):
                 title=f"{titlepre} for {title}".replace("\\n","\n")
         elif kwargs.get("titlepre"):
             title=kwargs.pop("titlepre")
+        else:
+            title=None
 
         if "table" in kwargs:
             plot: MPL_Figure=plot_api(pagenumber,subplots=(1,2),title=title,figsize=(width/dpi,height/dpi),layout=kwargs.pop("layout","tight"),subplots_kw=kwargs.pop("subplots_kw",{}))
@@ -267,14 +269,14 @@ def _pipeline(kwargs):
         
         #Preps args and kwargs for the plot
         plotsettings={key:kwargs.pop(key) for key in kwargs.copy() if key in ("subtitle","xlabel","ylabel","xticks","yticks","aspect","grid","bbox","set","cbar")}
-        
+
         if useback:
             if "subtitle" in plotsettings:
                 plot.set_subtitle(plotsettings["subtitle"],ax=ax) if not isinstance(plotsettings["subtitle"],dict) else plot.set_subtitle(ax=ax,**plotsettings["subtitle"])
-            
+
             if "xlabel" in plotsettings:
                 plot.set_xlabel(plotsettings["xlabel"],ax=ax) if not isinstance(plotsettings["xlabel"],dict) else plot.set_xlabel(ax=ax,**plotsettings["xlabel"])
-            
+
             if "ylabel" in plotsettings:
                 plot.set_ylabel(plotsettings["ylabel"],ax=ax) if not isinstance(plotsettings["ylabel"],dict) else plot.set_ylabel(ax=ax,**plotsettings["ylabel"])
 
@@ -417,7 +419,8 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
     globsets=[(key,item) for key,item in global_jason.items()]
     
     for key,item in globsets:
-        if key=="grd" or isinstance(item,dict) and (meshtype:=item.get("meshtype")):
+        if key=="grd" or isinstance(item,dict) and (meshtype:=item.get("meshtype")) or (meshtype:=universal_jason[key].get("meshtype")):
+
             logging.debug(f"Reading mesh {key}.")
             if key=="grd":
                 meshtype=None
@@ -428,10 +431,16 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
                         item={"path":global_jason[item] if not isinstance(global_jason[item],dict) else global_jason[item]["path"]}
                     global_jason[key]=item
             reader=item.pop("reader",universal_jason.get("grd",universal_jason.get(meshtype)).pop("reader"))
-            readerargs=item.pop("reader_args",universal_jason.get("grd",universal_jason.get(meshtype)).pop("reader_args",()))
-            readerkwargs=item.pop("reader_kwargs",universal_jason.get("grd",universal_jason.get(meshtype)).pop("reader_kwargs",{}))
-
-            readfunc=_getfunc(reader)
+            #[ ] Change this to use _merge_func_setting
+            if isinstance(reader,dict):
+                readername=reader.pop("name")
+                readerargs=reader.pop("args",universal_jason.get("grd",universal_jason.get(meshtype)).pop("args",()))
+                readerkwargs=reader.pop("kwargs",universal_jason.get("grd",universal_jason.get(meshtype)).pop("kwargs",{}))
+            else:
+                readername=reader
+                readerargs=[]
+                readerkwargs={}
+            readfunc=_getfunc(readername)
             global_jason[key]["vals"]=readfunc(global_jason[key]["path"],*readerargs,**readerkwargs)
     
 
