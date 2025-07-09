@@ -356,7 +356,7 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
     """
     
     if pdf or compress: image=not image
-
+    
     logging.debug("Reading universal settings.")
     with open(os.path.join(os.path.dirname(__file__),"settings.json")) as file:
         settings_jason=json.load(file)
@@ -460,7 +460,7 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
             glob={"path":glob}
         glob=squash_level(glob,universal_jason[universalkey])
         global_jason[globkey]={**globkwargs,**glob}
-
+    
 
     logging.debug("Updating plot settings.")
 
@@ -502,8 +502,10 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
         voptions.set_plot(plotdict)
 
         recs=plotdict.pop("recs",{0:{}})
+        
         for j,(rkey,rec) in enumerate(recs.items()):
             if "recnumber" in rec:
+                rec=rec.copy()
                 locplotdict=plotdict.copy()
                 locplotdict["recnumber"]=rec.pop("recnumber")
 
@@ -535,6 +537,7 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
                 logging.debug(f"All minreqs found for {key}.") 
                 locplotdict["loglevel"]=loglevel
                 locplotdict["pagenumber"]=i+j/10
+                print(locplotdict["titlepre"])
                 inputs.append(locplotdict)
             else:
                 logging.error(f"Keys {minreqs - set(locplotdict.keys())} are missing for plot {key}. Skipping.")
@@ -545,7 +548,7 @@ def vispipe(config,image=True,pdf=False,compress=False,loglevel=30):
         result=pool.map_async(_pipeline,inputs)
         result.wait()
     #This orders the individual pages and saves them as one file before cleaning up the work space.
-    #This try block allows for the error to be printed if all of the Pool jobs fail and still delete /pngs and /pages.
+    #This try block allows for the error to be 
     try:
         if pdf: _orderpdf(os.path.join(savedir,savepdf))
     except Exception as e:
