@@ -1,0 +1,80 @@
+name: Python Package Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    # Define the matrix for OS and Python versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        # Includes Python versions 3.9 up to 3.14 as requested.
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install uv and Build Dependencies
+      run: |
+        # Install uv first (the standard way via pip)
+        python -m pip install uv
+        uv venv
+        
+    - name: Build sdist and wheel
+      # The 'build' module generates the distribution files in the 'dist/' directory
+      run: uv build
+    - name: Get exact wheel filename
+      # This step finds the full path of the single wheel file generated in 'dist/' 
+      # and sets it as an environment variable (WHEEL_PATH) for subsequent steps.
+      run: |
+        WHEEL_PATH=$(ls dist/*.whl)
+        echo "WHEEL_PATH=$WHEEL_PATH" >> $GITHUB_ENV
+      shell: bash
+      
+    - name: Test import of the built package (using uv venv for isolation)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        # Create a clean venv using uv, which is often much faster than the standard venv module
+        
+        . .venv/bin/activate # Use test_venv\Scripts\activate on Windows
+        
+        # Use uv to install the generated wheel file into the isolated environment
+        uv pip install dist/*.whl
+        
+        # Replace 'your_package_name' with the actual name of your package
+        echo "Testing package import..."
+        python -c "import vispipe; print('Import successful!')"
+      # Handle different activation script paths for Windows and Linux runners
+      shell: bash
+      
+    - name: Test package import on Windows
+      if: matrix.os == 'windows-latest'
+      # The default shell on Windows runners is PowerShell, which uses .\Scripts\Activate.ps1
+      run: |
+        # Activate venv using the PowerShell script path
+        .venv\Scripts\Activate.ps1
+        
+        # Install the built wheel using the environment variable access for PowerShell ($env:VAR_NAME)
+        uv pip install $env:WHEEL_PATH
+        python -c "import vispipe; print('Import successful!')"
+      shell: powershell
+
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files-${{ matrix.os }}-${{ matrix.python-version }}
+        path: dist/
