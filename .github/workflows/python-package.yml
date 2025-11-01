@@ -53,21 +53,18 @@ jobs:
       # Handle different activation script paths for Windows and Linux runners
       shell: bash
       
-    - name: Test import of the built package (using uv venv for isolation)
+    - name: Test package import on Windows
       if: matrix.os == 'windows-latest'
+      # The default shell on Windows runners is PowerShell, which uses .\Scripts\Activate.ps1
       run: |
-        # Create a clean venv using uv, which is often much faster than the standard venv module
+        # Activate venv using the PowerShell script path
+        .\test_venv\Scripts\Activate.ps1
         
-        .venv\Scripts\activate
-        
-        # Use uv to install the generated wheel file into the isolated environment
-        uv pip install dist/*.whl
-        
-        # Replace 'your_package_name' with the actual name of your package
-        echo "Testing package import..."
-        python -c "import vispipe; print('Import successful!')"
-      # Handle different activation script paths for Windows and Linux runners
+        # Install the built wheel using the environment variable access for PowerShell ($env:VAR_NAME)
+        uv pip install $env:WHEEL_PATH
+        python -c "import your_package_name; print('Import successful!')"
       shell: powershell
+
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
