@@ -9,7 +9,7 @@
 project = 'VisPipe'
 copyright = '2024, Gramm, Joshua'
 author = 'Gramm, Joshua'
-release = '1.0.0'
+release = '1.0.3'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
