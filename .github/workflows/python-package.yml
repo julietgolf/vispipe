@@ -61,7 +61,7 @@ jobs:
         .venv\Scripts\Activate.ps1
         
         # Install the built wheel using the environment variable access for PowerShell ($env:VAR_NAME)
-        uv pip install $env:WHEEL_PATH
+        uv pip install .\dist\*.whl
         python -c "import vispipe; print('Import successful!')"
       shell: powershell
 
