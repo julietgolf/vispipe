@@ -1,3 +1,4 @@
 numpydoc
 sphinx_autodoc_typehints
 pydata_sphinx_theme
+vispipe
