@@ -36,7 +36,14 @@ jobs:
     - name: Build sdist and wheel
       # The 'build' module generates the distribution files in the 'dist/' directory
       run: uv build
-
+    - name: Get exact wheel filename
+      # This step finds the full path of the single wheel file generated in 'dist/' 
+      # and sets it as an environment variable (WHEEL_PATH) for subsequent steps.
+      run: |
+        WHEEL_PATH=$(ls dist/*.whl)
+        echo "WHEEL_PATH=$WHEEL_PATH" >> $GITHUB_ENV
+      shell: bash
+      
     - name: Test import of the built package (using uv venv for isolation)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -61,7 +68,7 @@ jobs:
         .venv\Scripts\Activate.ps1
         
         # Install the built wheel using the environment variable access for PowerShell ($env:VAR_NAME)
-        uv pip install .\dist\*.whl
+        uv pip install $env:WHEEL_PATH
         python -c "import vispipe; print('Import successful!')"
       shell: powershell
 
