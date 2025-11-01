@@ -6,6 +6,8 @@ readme = "README.md"
 authors = [
     { name = "Joshua Gramm", email = "joshua.d.gramm@erdc.dren.mil" }
 ]
+
+
 requires-python = ">=3.9"
 dependencies = [
     "numpy",
@@ -15,6 +17,9 @@ dependencies = [
     "matplotlib"
 ]
 
+[project.urls]
+    Documentation = "https://vispipe.readthedocs.io/en/latest/"
+    Repository = "https://github.com/julietgolf/vispipe"
 
 [project.scripts]
 vispipe="vispipe.vispipe_cli:main"
