@@ -58,7 +58,7 @@ jobs:
       # The default shell on Windows runners is PowerShell, which uses .\Scripts\Activate.ps1
       run: |
         # Activate venv using the PowerShell script path
-        .\test_venv\Scripts\Activate.ps1
+        .venv\Scripts\Activate.ps1
         
         # Install the built wheel using the environment variable access for PowerShell ($env:VAR_NAME)
         uv pip install $env:WHEEL_PATH
