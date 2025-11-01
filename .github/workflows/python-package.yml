@@ -1,0 +1,61 @@
+name: Python Package Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    # Define the matrix for OS and Python versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        # Includes Python versions 3.9 up to 3.14 as requested.
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install uv and Build Dependencies
+      run: |
+        # Install uv first (the standard way via pip)
+        python -m pip install uv
+        
+        # Use uv to install the 'build' backend, which is required to create the package distributions
+        uv pip install build
+        
+    - name: Build sdist and wheel
+      # The 'build' module generates the distribution files in the 'dist/' directory
+      run: python -m build --sdist --wheel
+
+    - name: Test import of the built package (using uv venv for isolation)
+      run: |
+        # Create a clean venv using uv, which is often much faster than the standard venv module
+        uv venv test_venv
+        . test_venv/bin/activate # Use test_venv\Scripts\activate on Windows
+        
+        # Use uv to install the generated wheel file into the isolated environment
+        uv pip install dist/*.whl
+        
+        # Replace 'your_package_name' with the actual name of your package
+        echo "Testing package import..."
+        python -c "import your_package_name; print('Import successful!')"
+      # Handle different activation script paths for Windows and Linux runners
+      shell: bash
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files-${{ matrix.os }}-${{ matrix.python-version }}
+        path: dist/
