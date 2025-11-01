@@ -54,7 +54,7 @@ jobs:
       shell: bash
       
     - name: Test import of the built package (using uv venv for isolation)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'windows-latest'
       run: |
         # Create a clean venv using uv, which is often much faster than the standard venv module
         
