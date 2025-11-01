@@ -62,7 +62,7 @@ jobs:
         
         # Install the built wheel using the environment variable access for PowerShell ($env:VAR_NAME)
         uv pip install $env:WHEEL_PATH
-        python -c "import your_package_name; print('Import successful!')"
+        python -c "import vispipe; print('Import successful!')"
       shell: powershell
 
 
