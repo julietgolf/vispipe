@@ -7,7 +7,6 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'VisPipe'
-copyright = '2024, Gramm, Joshua'
 author = 'Gramm, Joshua'
 release = '1.0.3'
 

@@ -4,8 +4,11 @@
 
 VisPipe
 =======
-
+.. _pypi: https://pypi.org/project/vispipe/
+.. _github: https://github.com/julietgolf/vispipe
 .. _CSTORM: https://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476697/
+
+Project Links: `GitHub Repo <github_>`_ | `PYPI <pypi_>`_
 
 The Visualization Pipeline (VisPipe) is a package designed to handle scripted batch visualization.  
 Originally designed for use with `Coastal Storm Modeling System (CSTORM) <CSTORM_>`_ for use on high 
