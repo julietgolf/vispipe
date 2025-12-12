@@ -288,7 +288,6 @@ def _pipeline(kwargs):
                 plot.set_grid(plotsettings["grid"],ax=ax) if not isinstance(plotsettings["grid"],dict) else plot.set_grid(ax=ax,**plotsettings["grid"])
 
             if "bbox" in plotsettings:
-                logging.debug(f"{plotsettings["bbox"]}")
                 plot.set_bbox(plotsettings["bbox"],ax=ax) if not isinstance(plotsettings["bbox"],dict) else plot.set_bbox(ax=ax,**plotsettings["bbox"])
 
             if "set" in plotsettings:
@@ -308,7 +307,6 @@ def _pipeline(kwargs):
             plotargs,plotkwargs=_read_sig(plotter,vals,kwargs,plotargs,plotkwargs,locals(),recnumber)
         
         logging.debug(f"Fig {pagenumber}\nplotargs: {plotargs}")
-        logging.debug(f"{ax.get_xlim()},{ax.get_ylim()}")
         logging.debug(f"plotkwargs: {plotkwargs}")
         logging.debug(f"Plotting fig {pagenumber}.")
 
