@@ -242,7 +242,6 @@ def _pipeline(kwargs):
             if "empty_value" in kwargs: del kwargs["empty_value"]
             logging.warning(f"\t\nUsing default unit ({kwargs.pop('defunit')}) for:{loggingsuffix}")
     
-
         if "title" in kwargs:
             titlepre=kwargs.pop("titlepre",False)
             title=kwargs.pop("title")
@@ -250,7 +249,6 @@ def _pipeline(kwargs):
                 title=f"{titlepre} for {title}".replace("\\n","\n")
         elif kwargs.get("titlepre"):
             title=kwargs.pop("titlepre")
-
         if "table" in kwargs:
             plot: MPL_Figure=plot_api(pagenumber,subplots=(1,2),title=title,figsize=(width/dpi,height/dpi),layout=kwargs.pop("layout","tight"),subplots_kw=kwargs.pop("subplots_kw",{}))
             fig,(table_ax,ax)=plot.return_fig()
@@ -266,9 +264,8 @@ def _pipeline(kwargs):
 
         
         #Preps args and kwargs for the plot
-        plotsettings={key:kwargs.pop(key) for key in kwargs.copy() if key in ("subtitle","xlabel","ylabel","xticks","yticks","aspect","grid","bbox","set","cbar")}
-        
         if useback:
+            plotsettings={key:kwargs.pop(key) for key in kwargs.copy() if key in ("subtitle","xlabel","ylabel","xticks","yticks","aspect","grid","bbox","set","cbar")}
             if "subtitle" in plotsettings:
                 plot.set_subtitle(plotsettings["subtitle"],ax=ax) if not isinstance(plotsettings["subtitle"],dict) else plot.set_subtitle(ax=ax,**plotsettings["subtitle"])
             
@@ -291,6 +288,7 @@ def _pipeline(kwargs):
                 plot.set_grid(plotsettings["grid"],ax=ax) if not isinstance(plotsettings["grid"],dict) else plot.set_grid(ax=ax,**plotsettings["grid"])
 
             if "bbox" in plotsettings:
+                logging.debug(f"{plotsettings["bbox"]}")
                 plot.set_bbox(plotsettings["bbox"],ax=ax) if not isinstance(plotsettings["bbox"],dict) else plot.set_bbox(ax=ax,**plotsettings["bbox"])
 
             if "set" in plotsettings:
@@ -308,8 +306,10 @@ def _pipeline(kwargs):
             plotkwargs.update(kwargs)
         else:
             plotargs,plotkwargs=_read_sig(plotter,vals,kwargs,plotargs,plotkwargs,locals(),recnumber)
-
-        logging.debug(f"Fig {pagenumber} plotkwargs: {plotkwargs}")
+        
+        logging.debug(f"Fig {pagenumber}\nplotargs: {plotargs}")
+        logging.debug(f"{ax.get_xlim()},{ax.get_ylim()}")
+        logging.debug(f"plotkwargs: {plotkwargs}")
         logging.debug(f"Plotting fig {pagenumber}.")
 
         cm=plotfunc(*plotargs,**plotkwargs)

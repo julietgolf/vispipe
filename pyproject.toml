@@ -1,6 +1,6 @@
 [project]
 name = "vispipe"
-version = "1.0.3"
+version = "1.0.4b1"
 description = "Add your description here"
 readme = "README.md"
 authors = [

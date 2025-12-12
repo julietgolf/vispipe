@@ -118,8 +118,8 @@ def opt_reader(opt_path: str | os.PathLike | list[str | os.PathLike],/,filepre: 
                         if fin_title: plot_params["title"]=fin_title
                         config["plots"][plotname]=plot_params
 
-        for key,cnt in plotcount.items(): 
-            if not cnt: del config["globals"][key]
+        #for key,cnt in plotcount.items(): 
+        #    if not cnt: del config["globals"][key]
 
     if not dump:
         return config
