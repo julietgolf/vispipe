@@ -44,12 +44,12 @@
     "universals":{
         "grd":{
             "ascii": {
-                "reader": "meshtools.file_io.readers.readmesh"
+                "reader": "cstorm_utils.file_io.readers.readmesh"
             },
             "netcdf4": {
-                "reader": "meshtools.file_io.readers.readmeshnc"
+                "reader": "cstorm_utils.file_io.readers.readmeshnc"
             },
-            "plotter": {"name":"meshtools.pltdepth"},
+            "plotter": {"name":"cstorm_utils.plotters.pltdepth"},
             "unit":"meter",
             "titlepre": "ADCIRC Topo(-)/Bathy(+)",
             "minimum": ["reader","plotter","path"],
@@ -59,16 +59,16 @@
             "no_back":true,
             "ascii": {
                 "reader": {
-                    "name":"meshtools.read_minmax63",
+                    "name":"cstorm_utils.read_minmax63",
                     "kwargs":{"extreme_only":true}
                 }
             },
             "netcdf4": {
-                "reader": "meshtools.file_io.readers.readvalnc"
+                "reader": "cstorm_utils.file_io.readers.readvalnc"
             },
             "mesh": "grd",
             "plotter":{ 
-                "name":"meshtools.pltminmax63",
+                "name":"cstorm_utils.plotters.pltminmax63",
                 "mesh":true,
                 "sig":{"vals":"vp:vals","*meshinfo":"vp:mesh","fig":"vp:fig","ax":"vp:ax"},
                 "kwargs": {
@@ -79,7 +79,7 @@
             "minimum": ["reader","plotter","path"],
             "empty_value": -99999,
             "stattable":{
-                "name":"meshtools.plotters.plotters.stattable",
+                "name":"cstorm_utils.plotters.plotters.stattable",
                 "kwargs":{"modeltype":"adcirc"},
                 "sig":{"vals":"vp:vals","ax":"vp:table_ax","mesh":"vp:mesh","*":null,"exclusive":true}
             }
@@ -112,8 +112,10 @@
             },
             "unit": "hcmH2O",
             "titlepre": "ADCIRC Minimum Pressure",
-            "plotter_kwargs": {
-                "defstdr": [-2.5,2.5]
+            "plotter":{
+                "plotter_kwargs": {
+                    "defstdr": [-2.5,2.5]
+                }
             }
         },
         "maxwvel": {
@@ -156,9 +158,9 @@
             "crange": ["h",0,360]
         },
         "out_max": {
-            "reader": {"name":"meshtools.file_io.readers.read_stwave_vispipe"},
+            "reader": {"name":"cstorm_utils.file_io.readers.read_stwave_vispipe"},
             "plotter": {
-                "name":"meshtools.pltstwave",
+                "name":"cstorm_utils.plotters.pltstwave",
                 "kwargs": {
                     "xlabel": "Longitude (deg)",
                     "ylabel": "Latitude (deg)"
@@ -167,7 +169,7 @@
             "no_back":true,
             "minimum": ["reader","plotter","path"],
             "stattable":{
-                "name":"meshtools.plotters.plotters.stattable",
+                "name":"cstorm_utils.plotters.plotters.stattable",
                 "kwargs":{"modeltype":"stwave"}
             }
         },

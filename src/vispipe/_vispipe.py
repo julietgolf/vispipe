@@ -15,7 +15,9 @@ __all__=["vispipe"]
 #[ ] Start with multiplot be in serial then figure out how to get procs to comunicate.
 #[ ] lru_cache for vals that have been read already.
 #[ ] make better logger
-    
+
+#TODO Use io.Bytesbuf to make writting the faster
+
 def _getfunc(plm):
     """Imports a function from a package.module.function string."""
     func=getattr(importlib.import_module(".".join((readlist:=plm.split("."))[:-1])),readlist[-1])
