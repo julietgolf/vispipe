@@ -6,10 +6,7 @@ from __future__ import annotations
 import numpy as np
 
 #[ ] Make a parent function for tri functions with kwarg mode={"cpu","gpu","auto"} that passes to proper function.
-def tri_bbox_prep(mesh: np.ndarray,
-                   bbox: tuple[float,float,float,float],
-                   vals: np.ndarray=None
-                   ) -> np.ndarray | tuple[np.ndarray,np.ndarray]:
+def tri_bbox_prep(mesh,bbox,vals):
     """Frontend for `trigridtrim()` that widens `bbox` used to trim the mesh to prevent whitespace in the plotted `bbox`.
 
     Parameters
@@ -43,9 +40,9 @@ def tri_bbox_prep(mesh: np.ndarray,
     else: 
         mesh.triangles=trimmed
         return mesh
-    
 
-def trigridtrim(elemcomps: np.ndarray,nodes: np.ndarray,bbox: list,vals: np.ndarray=None,returnindex: bool=False) -> np.ndarray | list[np.ndarray]:
+
+def trigridtrim(elemcomps: np.ndarray,nodes: np.ndarray,bbox: list | tuple,vals: np.ndarray | None=None,returnindex: bool=False) -> np.ndarray | list[np.ndarray]:
     """Funtion to cut out a portion of the elements from a unstructured triangular mesh.
     
     Parameters
@@ -81,19 +78,19 @@ def trigridtrim(elemcomps: np.ndarray,nodes: np.ndarray,bbox: list,vals: np.ndar
     bbox_y=np.where(np.logical_and(barycenters[1]>=bbox[1],barycenters[1]<=bbox[3]))
     bboxindex=np.intersect1d(bbox_x,bbox_y)
     
-    if not np.any(vals)  and not returnindex: return elemcomps[bboxindex]
+    if not np.any(vals)  and not returnindex: return elemcomps[bboxindex] #ty: ignore[no-matching-overload]
     bboxelem=elemcomps[bboxindex]
     returnlist=[bboxelem]
 
-    if np.any(vals): 
+    if np.any(vals):  #ty: ignore[no-matching-overload]
         nodeindex=np.unique(bboxelem)
-        returnlist.append(vals[nodeindex])
+        returnlist.append(vals[nodeindex]) #ty: ignore[not-subscriptable]
     if returnindex: returnlist.append(bboxindex)
     return returnlist
 
 
 #Creates a smaller grid from a larger grid.
-def trigridcut(nodes: np.ndarray,bbox: list,elemcomps: np.ndarray=None,vals: np.ndarray=None,returnindex: bool=False) -> np.ndarray | list[np.ndarray]:
+def trigridcut(nodes: np.ndarray,bbox: list,elemcomps: np.ndarray | None=None,vals: np.ndarray | None=None,returnindex: bool=False) -> np.ndarray | list[np.ndarray]:
     """Funtion to cut out a portion of the x and y coordinates from a unstructured triangular.
     
     Parameters
@@ -130,30 +127,30 @@ def trigridcut(nodes: np.ndarray,bbox: list,elemcomps: np.ndarray=None,vals: np.
     bbox_y=np.where(np.logical_and(nodes[:,1]>=bbox[1],nodes[:,1]<=bbox[3]))
     bboxindex=np.intersect1d(bbox_x,bbox_y)
 
-    if not np.any(vals) and not np.any(elemcomps) and not returnindex: return nodes[bboxindex,0:3]
+    if not np.any(vals) and not np.any(elemcomps) and not returnindex: return nodes[bboxindex,0:3] #ty: ignore[no-matching-overload]
 
     returnlist=[nodes[bboxindex,0:3]]
     
-    if np.any(elemcomps):
+    if np.any(elemcomps): #ty: ignore[no-matching-overload]
         #Creates a booleen matrix for elemcomps and then creates a new elementcomp matrix where all three elements are  of elemcomps true.
-        elemcompbool=np.isin(elemcomps,bboxindex)
-        bboxelemcomp=elemcomps[elemcompbool[:,0]&elemcompbool[:,1]&elemcompbool[:,2]]
+        elemcompbool=np.isin(elemcomps,bboxindex) #ty: ignore[invalid-argument-type]
+        bboxelemcomp=elemcomps[elemcompbool[:,0]&elemcompbool[:,1]&elemcompbool[:,2]] #ty: ignore[not-subscriptable]
         
         #Because bboxelemcomp is cut out from elemcomps, its indexes are not the same as bboxindex. 
         #np.nditer is used to iterate through bboxelcomp and sets them to the index of bboxindex to reference them properly. 
         #This does not work if the bbox has no nodes. I do not care.
         indexdict={ str(orgindex): i for i,orgindex in enumerate(bboxindex) }
-        with np.nditer(bboxelemcomp,op_flags=["readwrite"]) as tec:
+        with np.nditer(bboxelemcomp,op_flags=["readwrite"]) as tec: #ty: ignore[invalid-argument-type]
             for node in tec:
-                node[...]=indexdict[str(node)] 
+                node[...]=indexdict[str(node)] #ty: ignore[invalid-assignment]
     
         returnlist.append(bboxelemcomp)
 
-    if np.any(vals): returnlist.append(vals[bboxindex])
+    if np.any(vals): returnlist.append(vals[bboxindex]) #ty: ignore[no-matching-overload,not-subscriptable]
     if returnindex: returnlist.append(bboxindex)
     return returnlist
 
-def meshgridcut(mesh: np.ndarray ,bbox: list,vals:np.ndarray=None) -> np.ndarray | tuple[np.ndarray,np.ndarray]:
+def meshgridcut(mesh: np.ndarray ,bbox: list,vals:np.ndarray | None=None) -> np.ndarray | tuple[np.ndarray,np.ndarray]:
     """Cuts out the x and y from a np.meshgrid. Used for stwave data.
     
     Parameters
@@ -179,6 +176,7 @@ def meshgridcut(mesh: np.ndarray ,bbox: list,vals:np.ndarray=None) -> np.ndarray
     bboxindex=np.logical_and(bbox_x,bbox_y)
 
     #Traverses through the x direction and then deletes all non needed columns from the array.
+    #TODO Inline this loop
     dele=np.empty(0).astype(int)
     for i in range(len(bboxindex)):
         if np.any(bboxindex[i])!=True:
@@ -187,7 +185,7 @@ def meshgridcut(mesh: np.ndarray ,bbox: list,vals:np.ndarray=None) -> np.ndarray
     bboxindex=np.delete(bboxindex,dele,axis=0)
     bboxmesh_x=np.delete(mesh[0],dele,axis=0)
     bboxmesh_y=np.delete(mesh[1],dele,axis=0)
-    if np.any(vals): bboxvals=np.delete(vals,dele,axis=0)
+    if np.any(vals): bboxvals=np.delete(vals,dele,axis=0) #ty: ignore[no-matching-overload]
 
     dele=np.empty(0).astype(int)
 
@@ -198,7 +196,7 @@ def meshgridcut(mesh: np.ndarray ,bbox: list,vals:np.ndarray=None) -> np.ndarray
     
     bboxmesh_x=np.delete(bboxmesh_x,dele,axis=1)
     bboxmesh_y=np.delete(bboxmesh_y,dele,axis=1)
-    if np.any(vals): bboxvals=np.delete(bboxvals,dele,axis=1)
+    if np.any(vals): bboxvals=np.delete(bboxvals,dele,axis=1) #ty: ignore[no-matching-overload]
     bboxmesh=np.array([bboxmesh_x,bboxmesh_y])
 
-    return (bboxmesh,bboxvals) if np.any(vals) else bboxmesh
+    return (bboxmesh,bboxvals) if np.any(vals) else bboxmesh #ty: ignore[no-matching-overload]
