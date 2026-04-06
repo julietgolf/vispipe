@@ -135,3 +135,4 @@ def main():
             )
         except Exception as e:
             logging.exception(f"{e}")
+            exit(1)
