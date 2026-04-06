@@ -323,6 +323,9 @@ def _pipeline(kwargs):
                 title = f"{titlepre} for {title}".replace("\\n", "\n")
         elif kwargs.get("titlepre"):
             title = kwargs.pop("titlepre")
+        else:
+            title = None
+        
         if "table" in kwargs:
             plot: MPL_Figure = plot_api(
                 pagenumber,
