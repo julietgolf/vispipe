@@ -37,6 +37,7 @@ jobs:
         # This step activates the environment and then runs the commands.
         # This ensures the 'vispipe' command is found.
         run: |
+          set -e
           # Activate venv
           if [ "$RUNNER_OS" == "Windows" ]; then
             source .venv/Scripts/activate
@@ -46,7 +47,7 @@ jobs:
           
           # Navigate and run tests
           vispipe --swap_settings example/settings.json
-          vispipe config.json
+          vispipe example/config.json
         shell: bash
 
       - name: Upload Test Output (PNGs)
@@ -57,6 +58,6 @@ jobs:
           # The name of the artifact that will be uploaded
           name: test-output-${{ matrix.os }}-py${{ matrix.python-version }}
           # The path to the files to upload (all .png files in the examples directory)
-          path: examples/*.png
+          path: *.png
           # How long to keep the artifacts (optional, default is 90 days)
           retention-days: 7
