@@ -27,7 +27,7 @@
         "unstruct_grd":{
             "meshtype":"unstruct_grd",
             "reader":{
-                "name": "vispipe.example.readers.read_unstruct_grd"
+                "name": "vispipe_tests.readers.read_unstruct_grd"
             },
             "plotter": {
                 "name":"tricontour",
@@ -40,7 +40,7 @@
         "struct_grd":{
             "meshtype":"struct_grd",
             "reader":{
-                "name":"vispipe.example.readers.read_data",
+                "name":"vispipe_tests.readers.read_data",
                 "kwargs":{
                     "key":"mesh"
                 },
@@ -49,7 +49,7 @@
         },
         "data_base":{
             "reader":{
-                "name": "vispipe.example.readers.read_data"
+                "name": "vispipe_tests.readers.read_data"
             },
             "minimum": ["reader","plotter","path"]
         },

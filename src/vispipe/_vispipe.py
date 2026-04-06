@@ -706,7 +706,7 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
                 logging.debug(f"All minreqs found for {key}.")
                 locplotdict["loglevel"] = loglevel
                 locplotdict["pagenumber"] = i + j / 10
-                print(locplotdict["titlepre"])
+                #print(locplotdict["titlepre"])
                 inputs.append(locplotdict)
             else:
                 logging.error(

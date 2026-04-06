@@ -47,6 +47,7 @@ jobs:
           
           # Navigate and run tests
           cd example
+          uv pip install .
           vispipe --swap_settings settings.json
           vispipe config.json
         shell: bash
