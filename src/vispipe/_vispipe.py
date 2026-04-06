@@ -313,7 +313,7 @@ def _pipeline(kwargs):
             if "empty_value" in kwargs:
                 del kwargs["empty_value"]
             logging.warning(
-                f"\t\nUsing default unit ({kwargs.pop('defunit')}) for:{loggingsuffix}"
+                f"\t\nUsing default unit ({kwargs.pop('defunit',None)}) for:{loggingsuffix}"
             )
 
         if "title" in kwargs:
