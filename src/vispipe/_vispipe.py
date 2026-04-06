@@ -568,11 +568,16 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
                         item = {"path": global_jason[item] if not isinstance(global_jason[item], dict) else global_jason[item]["path"]}
                     global_jason[key] = item
             reader = item.pop("reader",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader"))
-            readerargs = item.pop("reader_args",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader_args", ()))
-            readerkwargs = item.pop("reader_kwargs",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader_kwargs", {}))
+            if  isinstance(reader,str):
+                readfunc = _getfunc(reader)
+                global_jason[key]["vals"] = readfunc(global_jason[key]["path"])
 
-            readfunc = _getfunc(reader if isinstance(reader,str) else reader["name"])
-            global_jason[key]["vals"] = readfunc(global_jason[key]["path"], *readerargs, **readerkwargs)
+            else:
+                readfunc = _getfunc(reader["name"])
+                readargs = reader.pop("args", ())
+                readkwargs = reader.pop("kwargs", {})
+
+                global_jason[key]["vals"] = readfunc(global_jason[key]["path"], *readargs, **readkwargs)
 
     logging.debug("Making pngs and pages dirs.")
     pngpath = os.path.join(savedir, "pngs")
