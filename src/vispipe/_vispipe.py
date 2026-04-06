@@ -729,7 +729,7 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
             shutil.rmtree(pngpath)
         if pdf:
             shutil.rmtree(pagespath)
-        return
+        raise e
 
     # Cleans up workspace based on command line flags.
     if compress:
