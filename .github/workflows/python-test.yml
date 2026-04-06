@@ -60,6 +60,8 @@ jobs:
           # The name of the artifact that will be uploaded
           name: test-output-${{ matrix.os }}-py${{ matrix.python-version }}
           # The path to the files to upload (all .png files in the examples directory)
-          path: example/*.png
+          path: |
+            example/*.png
+            example/*.pdf
           # How long to keep the artifacts (optional, default is 90 days)
           retention-days: 7
