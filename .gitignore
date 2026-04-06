@@ -7,3 +7,5 @@ Pipfile
 _*/
 .venv/
 **/*_settings.json
+cleanup/
+*_cache/
