@@ -1,0 +1,46 @@
+{
+    "globals":{
+        "unstruct_grd":{
+            "path":"%PATH%/unstruct.npz",
+            "set":{"aspect":"equal"}
+        },
+        "unstruct_data":{
+            "path":"%PATH%/unstruct_data.npz",
+            "set":{"aspect":"equal"},
+            "cbar":true
+        },
+        "struct_grd":{
+            "path":"%PATH%/struct.npz",
+            "set":{"aspect":"equal"}
+        },
+        "struct_data":"%PATH%/struct_data.npz",
+        "xy_data":"%PATH%/xy_data.npz",
+        "hist_data":"%PATH%/hist_data.npz"
+    },
+    "plots":{
+        "unstruct_grd":null,
+        "unstruct_grd:0":{
+            "plotter":"triplot",
+            "mesh":"unstruct_grd"
+        },
+        "unstruct_data":null,
+        "struct_data":null,
+        "xy_data:0":null,
+        "xy_data:1":{
+            "plotter":"scatter",
+            "cmap":"magma"
+        },
+        
+        "hist_data":{
+            "cmap":"cividis",
+            "bins":16,
+            "set":{
+                "facecolor":"#343434"
+            },
+            "xticks":{
+                "xticks":[0.4375, 1.375, 2.3125, 3.25, 4.1875, 5.125, 6.0625, 7.0, 7.9375, 8.875, 9.8125, 10.75, 11.6875, 12.625, 13.5625, 14.5],
+                "labels":["0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"]
+            }
+        }
+    }
+}

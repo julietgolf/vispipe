@@ -1,0 +1,91 @@
+{
+    "format":{
+        "default": "ascii",
+        "set": ["ascii", "netcdf4"]
+    },
+    "opt":{
+        
+    },
+    "plotters":{
+        "triplot":{
+            "mesh":true,
+            "sig":{"*meshdata":"vp:mesh"}
+        },
+        "contour":{
+            "mesh":true,
+            "sig":{"vals":"vp:vals","mesh":"vp:mesh"}
+        },
+        "tricontour":{
+            "mesh":true,
+            "sig":{"vals":"vp:vals","*meshdata":"vp:mesh"}
+        },
+        "hist":{
+            "sig":{"vals":"vp:vals","bins":"vp:bins"}
+        }
+    },
+    "universals":{
+        "unstruct_grd":{
+            "meshtype":"unstruct_grd",
+            "reader":{
+                "name": "vispipe.example.readers.read_unstruct_grd"
+            },
+            "plotter": {
+                "name":"tricontour",
+                "sig":{"vals":2,"*meshdata":"vp:vals"}
+            },
+            "unit":"meter",
+            "minimum": ["reader","plotter","path"],
+            "empty_value": -99999
+        },
+        "struct_grd":{
+            "meshtype":"struct_grd",
+            "reader":{
+                "name":"vispipe.example.readers.read_data",
+                "kwargs":{
+                    "key":"mesh"
+                },
+            "minimum": ["reader","plotter","path"]
+            }
+        },
+        "data_base":{
+            "reader":{
+                "name": "vispipe.example.readers.read_data"
+            },
+            "minimum": ["reader","plotter","path"]
+        },
+        "unstruct_data":{
+            "base": "data_base",
+            "mesh": "unstruct_grd",
+            "plotter":"tricontour",
+            "xlabel": "Longitude (deg)",
+            "ylabel": "Latitude (deg)",
+            "emptyval": -99999,
+            "unit": "meter"
+        },
+        "struct_data": {
+            "base": "data_base",
+            "mesh":"struct_grd",
+            "plotter":"contour",
+            "xlabel": "Longitude (deg)",
+            "ylabel": "Latitude (deg)",
+            "unit": "sec"
+        },
+        "xy_data":{
+            "base": "data_base",
+            "plotter":{ 
+                "name":"line"
+            },
+            "xlabel": "Step",
+            "ylabel": "Height",
+            "unit": "meter"
+        },
+        "hist_data":{
+            "base":"data_base",
+            "plotter":{ 
+                "name":"hist"
+            },
+            "xlabel": "State",
+            "ylabel": "Count"
+        }
+    }
+}
