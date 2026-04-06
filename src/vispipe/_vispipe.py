@@ -556,11 +556,8 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
     globsets = [(key, item) for key, item in global_jason.items()]
 
     for key, item in globsets:
-        if (
-            key == "grd"
-            or isinstance(item, dict)
-            and (meshtype := item.get("meshtype"))
-        ):
+        print(key, isinstance(item, dict),item.get("meshtype"))
+        if (key == "grd" or isinstance(item, dict) and (meshtype := item.get("meshtype"))):
             logging.debug(f"Reading mesh {key}.")
             if key == "grd":
                 meshtype = None
@@ -568,33 +565,14 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
                     if formattype != "netcdf4":
                         item = {"path": item}
                     else:
-                        item = {
-                            "path": global_jason[item]
-                            if not isinstance(global_jason[item], dict)
-                            else global_jason[item]["path"]
-                        }
+                        item = {"path": global_jason[item] if not isinstance(global_jason[item], dict) else global_jason[item]["path"]}
                     global_jason[key] = item
-            reader = item.pop(
-                "reader",
-                universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader"),
-            )
-            readerargs = item.pop(
-                "reader_args",
-                universal_jason.get("grd", universal_jason.get(meshtype)).pop(
-                    "reader_args", ()
-                ),
-            )
-            readerkwargs = item.pop(
-                "reader_kwargs",
-                universal_jason.get("grd", universal_jason.get(meshtype)).pop(
-                    "reader_kwargs", {}
-                ),
-            )
+            reader = item.pop("reader",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader"))
+            readerargs = item.pop("reader_args",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader_args", ()))
+            readerkwargs = item.pop("reader_kwargs",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader_kwargs", {}))
 
             readfunc = _getfunc(reader)
-            global_jason[key]["vals"] = readfunc(
-                global_jason[key]["path"], *readerargs, **readerkwargs
-            )
+            global_jason[key]["vals"] = readfunc(global_jason[key]["path"], *readerargs, **readerkwargs)
 
     logging.debug("Making pngs and pages dirs.")
     pngpath = os.path.join(savedir, "pngs")
@@ -680,9 +658,7 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
 
             if locplotdict["plotter"].get("mesh"):
                 logging.debug(f"Adding mesh data from {locplotdict['mesh']}.")
-                if locplotdict.get("mesh") is None or isinstance(
-                    locplotdict["mesh"], bool
-                ):
+                if locplotdict.get("mesh") is None or isinstance(locplotdict["mesh"], bool):
                     locplotdict["mesh"] = "grd"
                 locplotdict["mesh"] = global_jason[locplotdict["mesh"]]["vals"]
             elif "mesh" in locplotdict:
@@ -691,9 +667,7 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
             if "unit" in locplotdict:
                 punit = locplotdict["unit"]
                 if "recs" in universal_jason.get(universalkey):
-                    uunit = universal_jason.get(universalkey)["recs"][rkey].get(
-                        "unit", punit
-                    )
+                    uunit = universal_jason.get(universalkey)["recs"][rkey].get("unit", punit)
                 else:
                     uunit = universal_jason.get(universalkey).get("unit", punit)
                 if punit != uunit:
