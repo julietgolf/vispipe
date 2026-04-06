@@ -46,8 +46,9 @@ jobs:
           fi
           
           # Navigate and run tests
-          vispipe --swap_settings example/settings.json
-          vispipe example/config.json
+          cd example
+          vispipe --swap_settings settings.json
+          vispipe config.json
         shell: bash
 
       - name: Upload Test Output (PNGs)
@@ -58,6 +59,6 @@ jobs:
           # The name of the artifact that will be uploaded
           name: test-output-${{ matrix.os }}-py${{ matrix.python-version }}
           # The path to the files to upload (all .png files in the examples directory)
-          path: *.png
+          path: example/*.png
           # How long to keep the artifacts (optional, default is 90 days)
           retention-days: 7
