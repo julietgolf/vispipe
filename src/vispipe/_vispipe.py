@@ -554,9 +554,9 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
 
     logging.debug(f"Format set to {formattype}.")
     globsets = [(key, item) for key, item in global_jason.items()]
-    print(globsets)
+    print(globsets,flush=True)
     for key, item in globsets:
-        print(key, isinstance(item, dict) and item.get("meshtype"))
+        print(key, isinstance(item, dict) and item.get("meshtype"),flush=True)
         if (key == "grd" or isinstance(item, dict) and (meshtype := item.get("meshtype"))):
             logging.debug(f"Reading mesh {key}.")
             if key == "grd":

@@ -1,6 +1,7 @@
 {
     "globals":{
         "unstruct_grd":{
+            "meshtype":"unstruct_grd",
             "path":"example/unstruct.npz",
             "set":{"aspect":"equal"}
         },
@@ -10,6 +11,7 @@
             "cbar":true
         },
         "struct_grd":{
+            "meshtype":"struct_grd",
             "path":"example/struct.npz",
             "set":{"aspect":"equal"}
         },
