@@ -571,7 +571,7 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
             readerargs = item.pop("reader_args",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader_args", ()))
             readerkwargs = item.pop("reader_kwargs",universal_jason.get("grd", universal_jason.get(meshtype)).pop("reader_kwargs", {}))
 
-            readfunc = _getfunc(reader)
+            readfunc = _getfunc(reader if isinstance(reader,str) else reader["name"])
             global_jason[key]["vals"] = readfunc(global_jason[key]["path"], *readerargs, **readerkwargs)
 
     logging.debug("Making pngs and pages dirs.")
