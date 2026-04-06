@@ -19,10 +19,6 @@
     },
     "plots":{
         "unstruct_grd":null,
-        "unstruct_grd:0":{
-            "plotter":"triplot",
-            "mesh":"unstruct_grd"
-        },
         "unstruct_data":null,
         "struct_data":null,
         "xy_data:0":null,
