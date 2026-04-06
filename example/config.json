@@ -1,21 +1,21 @@
 {
     "globals":{
         "unstruct_grd":{
-            "path":"unstruct.npz",
+            "path":"example/unstruct.npz",
             "set":{"aspect":"equal"}
         },
         "unstruct_data":{
-            "path":"unstruct_data.npz",
+            "path":"example/unstruct_data.npz",
             "set":{"aspect":"equal"},
             "cbar":true
         },
         "struct_grd":{
-            "path":"struct.npz",
+            "path":"example/struct.npz",
             "set":{"aspect":"equal"}
         },
-        "struct_data":"struct_data.npz",
-        "xy_data":"xy_data.npz",
-        "hist_data":"hist_data.npz"
+        "struct_data":"example/struct_data.npz",
+        "xy_data":"example/xy_data.npz",
+        "hist_data":"example/hist_data.npz"
     },
     "plots":{
         "unstruct_grd":null,

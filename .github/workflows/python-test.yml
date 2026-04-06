@@ -27,7 +27,6 @@ jobs:
         # This step installs uv, creates a virtual environment,
         # and installs the current project (vispipe) into it.
         run: |
-          cd example
 
           python -m pip install uv
           uv venv
@@ -46,7 +45,7 @@ jobs:
           fi
           
           # Navigate and run tests
-          vispipe --swap_settings settings.json
+          vispipe --swap_settings example/settings.json
           vispipe config.json
         shell: bash
 
