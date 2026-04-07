@@ -50,7 +50,7 @@ jobs:
           uv pip install .
           vispipe --swap_settings settings.json
           vispipe -v config.json | tee test.out
-          grep -qP "^ERROR:" test.out && exit 1
+          grep -qP "^ERROR:" test.out && exit 1 || true
 
         shell: bash
 
