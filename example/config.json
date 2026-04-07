@@ -20,12 +20,34 @@
         "hist_data":"hist_data.npz"
     },
     "plots":{
-        "unstruct_grd":null,
-        "unstruct_data":null,
+        "unstruct_grd":{
+            "cmap":"pink_r",
+            "cbar":true,
+            "set":{
+                "facecolor":"#FAEBD7",
+                "aspect":"equal"
+            }
+        },
+        "unstruct_grd:0":{
+            "plotter":"triplot",
+            "mesh":"unstruct_grd"
+        },
+        "unstruct_data":{
+            "title":"test",
+            "bbox":[-68,15,-65,20],
+            "cbar":true,
+            "unit":"feet"
+        },
         "struct_data":null,
+        "struct_data:0":{
+            "title":"test"
+        },
         "xy_data:0":null,
         "xy_data:1":{
-            "plotter":"scatter",
+            "plotter":{
+                "name":"scatter",
+                "sig": {"points": "vp:vals", "*": null, "c":1, "**": "vp:plotkwargs"}
+            },
             "cmap":"magma"
         },
         

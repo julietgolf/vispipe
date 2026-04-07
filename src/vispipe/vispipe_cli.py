@@ -45,6 +45,13 @@ def main():
         "-v",
         "--verbose",
         action="store_const",
+        const=20,
+        help="Show info messages.",
+        default=30,
+    ),
+    _vispipe_parser.add_argument(
+        "--debug",
+        action="store_const",
         const=10,
         help="Show debugging messages.",
         default=30,

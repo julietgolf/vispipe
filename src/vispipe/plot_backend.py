@@ -466,7 +466,7 @@ class MPL_Figure(_vispipe_backend_api):
 
     # [ ]Utilize bbox's to trim all data types.
     # [ ]Rework to include standard ax.plot() call sigs.
-    def line(self, points, *args, T=True, ax=None, **linekwargs):
+    def line(self, points, *args, T=False, ax=None, **linekwargs):
         """Calls ax.plot()
 
         Parameters
@@ -499,10 +499,15 @@ class MPL_Figure(_vispipe_backend_api):
             self.sca(ax)
         if T:
             points = points.T
+
+        # TODO This should have the ability to handle empty vals
+        if "empty_value" in linekwargs:
+            del linekwargs["empty_value"]
+
         return ax.plot(*points, *args, **linekwargs)
 
     # [ ]Rework to include standard ax.scatter() call sigs.
-    def scatter(self, points, *args, T=True, ax=None, **scatterkwargs):
+    def scatter(self, points:np.ndarray, *args, T=False, ax=None, **scatterkwargs):
         """Calls ax.scatter()
 
         Parameters
@@ -532,6 +537,10 @@ class MPL_Figure(_vispipe_backend_api):
             ax = self.gca()
         else:
             self.sca(ax)
+
+        # TODO This should have the ability to handle empty vals
+        if "empty_value" in scatterkwargs:
+            del scatterkwargs["empty_value"]
 
         if T:
             points = points.T
@@ -576,6 +585,10 @@ class MPL_Figure(_vispipe_backend_api):
             mesh = Triangulation(meshdata[0][:, 0], meshdata[0][:, 1], meshdata[1])
         else:
             mesh = meshdata[0]
+
+        # TODO This should have the ability to handle empty vals
+        if "empty_value" in trikwargs:
+            del trikwargs["empty_value"]
 
         if np.any(bbox):
             mesh = tri_bbox_prep(mesh, bbox)
@@ -644,7 +657,11 @@ class MPL_Figure(_vispipe_backend_api):
             levels = np.linspace(low, high, 101, endpoint=True)
         else:
             levels = conkwargs.pop("levels")
-        conkwargs.pop("emptyval", None)
+
+        # TODO This should have the ability to handle empty vals
+        if "empty_value" in conkwargs:
+            del conkwargs["empty_value"]
+
         # Creates the filled contour to be plotted.
         if fill:
             cm = ax.contourf(mesh[0], mesh[1], vals, levels=levels, **conkwargs)
@@ -663,7 +680,7 @@ class MPL_Figure(_vispipe_backend_api):
         fill=True,
         limits=None,
         levels=101,
-        emptyval=None,
+        empty_value=None,
         ax=None,
         **triconkwargs,
     ):
@@ -689,7 +706,7 @@ class MPL_Figure(_vispipe_backend_api):
         levels : int, default=101
             The number of countor levels that will be generated.
 
-        emptyval : float | None, optional
+        empty_value : float | None, optional
             Value that will be masked out before the plot.
 
         ax : Axes | None, optional
@@ -718,15 +735,15 @@ class MPL_Figure(_vispipe_backend_api):
 
         if np.any(bbox):
             mesh, valsstats = tri_bbox_prep(mesh, bbox, vals=vals)
-            valsstats = valsstats[valsstats != emptyval]
+            valsstats = valsstats[valsstats != empty_value]
         else:
-            valsstats = vals[vals != emptyval]
+            valsstats = vals[vals != empty_value]
         if not limits:
             low = np.min(valsstats)
             high = np.max(valsstats)
             mesh.set_mask(
                 np.all(
-                    np.isin(mesh.triangles, np.asarray(vals == emptyval).nonzero()),
+                    np.isin(mesh.triangles, np.asarray(vals == empty_value).nonzero()),
                     axis=1,
                 )
             )
@@ -748,7 +765,7 @@ class MPL_Figure(_vispipe_backend_api):
         bins,
         cmap=None,
         valsrange=None,
-        emptyval=-99999,
+        empty_value=-99999,
         ax=None,
         **histkwargs,
     ):
@@ -771,7 +788,7 @@ class MPL_Figure(_vispipe_backend_api):
         valsrange : list[float,float] | None, optoinal
             If provided, only values with [valsrange[0],valsrange[1]] will be plotted.
 
-        emptyval : float | None, default=-99999
+        empty_value : float | None, default=-99999
             Value that will be masked out before the plot.
 
         ax : Axes | None, optional
@@ -799,7 +816,7 @@ class MPL_Figure(_vispipe_backend_api):
         if valsrange:
             vals = vals[vals >= valsrange[0]]
             vals = vals[vals <= valsrange[1]]
-        n, bins, patches = ax.hist(vals[vals != emptyval], bins, **histkwargs)
+        n, bins, patches = ax.hist(vals[vals != empty_value], bins, **histkwargs)
 
         if cmap:
             frac = n.size

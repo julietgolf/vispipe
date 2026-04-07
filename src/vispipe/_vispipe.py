@@ -18,13 +18,9 @@ from functools import partial
 
 __all__ = ["vispipe"]
 
-# [ ] Start with multiplot be in serial then figure out how to get procs to comunicate.
-# [ ] lru_cache for vals that have been read already.
-# [ ] make better logger
-
 # TODO Use io.Bytesbuf to make writting the faster
-
-
+# TODO "set" is being curshed during the config interp
+# TODO Ensure all custom function loads are formated correctly. See changes made to the mesh read.
 def _getfunc(plm):
     """Imports a function from a package.module.function string."""
     func = getattr(
@@ -268,54 +264,52 @@ def _pipeline(kwargs):
             kwargs.pop("meshtype", None)
 
         # Checks if the unit needs to be changed.
-        try:
-            if (
-                kwargs.get("defunit")
-                and kwargs["unit"] != kwargs.get("defunit")
-                and kwargs.get("mesh")
-            ):
-                logging.debug(
-                    f"Converting unit from {kwargs.get('defunit')} to {kwargs['unit']} for fig {pagenumber}."
+        if "unit" in kwargs or "defunit" in kwargs:
+            logging.debug(f"Checking if data needs a unit conversion {"unit" in kwargs} {"defunit" in kwargs}.")
+            try:
+                unit=kwargs["unit"]
+                if unit and unit != kwargs.get("defunit") != None:# and kwargs.get("mesh"):
+                    logging.info(
+                        f"Converting unit from {kwargs['defunit']} to {kwargs['unit']} for fig {pagenumber}."
+                    )
+                    ureg = UnitRegistry()
+                    mask=vals != kwargs.get("empty_value",np.nan)
+
+                    logging.debug(f"Found {len(vals)-len(mask)} empty values")
+
+                    vals[mask] = (
+                        ureg.Quantity(vals[mask], kwargs.pop("defunit"))
+                        .to(kwargs.get("unit"))
+                        .magnitude
+                    )
+
+                cbarunit="unit"
+
+            except:
+                cbarunit="defunit"
+                logging.warning(
+                    f"\t\nUsing default unit ({kwargs.get('defunit')}) for:{loggingsuffix}"
                 )
-                ureg = UnitRegistry()
-                tempvals = vals[vals != kwargs.get("empty_value")]
-                vals[vals != kwargs.pop("empty_value", np.nan)] = (
-                    ureg.Quantity(tempvals, kwargs.pop("defunit"))
-                    .to(kwargs.get("unit"))
-                    .magnitude
-                )
-            else:
-                if "defunit" in kwargs:
-                    del kwargs["defunit"]
-                if "empty_value" in kwargs:
-                    del kwargs["empty_value"]
+            finally:
+                cbarunit=kwargs.pop(cbarunit,None)
+                if not useback:
+                    kwargs["cbarunit"] = cbarunit
+                elif "cbar" in kwargs:
+                    if not isinstance(kwargs["cbar"], dict):
+                        kwargs["cbar"] = {"label": cbarunit}
+                    elif "label" not in kwargs["cbar"]:
+                        kwargs["cbar"]["label"] = cbarunit
+                
+        else:
+            logging.debug("Data does not need a unit conversion.")
 
-            if not useback:
-                kwargs["cbarunit"] = kwargs.pop("unit", None)
-            elif "cbar" in kwargs:
-                if not isinstance(kwargs["cbar"], dict):
-                    kwargs["cbar"] = {"label": kwargs.pop("unit")}
-                elif "label" not in kwargs["cbar"]:
-                    kwargs["cbar"]["label"] = kwargs.pop("unit")
-            else:
-                del kwargs["unit"]
-
-        except:
-            if not useback:
-                kwargs["cbarunit"] = kwargs.get("defunit")
-            elif "cbar" in kwargs:
-                if not isinstance(kwargs["cbar"], dict):
-                    kwargs["cbar"] = {"label": kwargs.get("defunit")}
-                elif "label" not in kwargs["cbar"]:
-                    kwargs["cbar"]["label"] = kwargs.get("defunit")
-            if "unit" in kwargs:
-                del kwargs["unit"]
-            if "empty_value" in kwargs:
-                del kwargs["empty_value"]
-            logging.warning(
-                f"\t\nUsing default unit ({kwargs.pop('defunit',None)}) for:{loggingsuffix}"
-            )
-
+        if "unit" in kwargs:
+            del kwargs["unit"]
+        if "defunit" in kwargs:
+            del kwargs["defunit"]
+        #if "empty_value" in kwargs:
+        #    del kwargs["empty_value"]
+    
         if "title" in kwargs:
             titlepre = kwargs.pop("titlepre", False)
             title = kwargs.pop("title")
@@ -462,7 +456,7 @@ def _pipeline(kwargs):
 
         if pdf:
             _writepdf(pngpath, width, height)
-        logging.info(f"Page {pagenumber} succesfully writen.")
+            logging.info(f"Page {pagenumber} succesfully writen.")
     except Exception as e:
         logging.error(f"An error occured for fig {pagenumber}.")
         logging.exception(f"{e}")
@@ -557,11 +551,12 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
 
     logging.debug(f"Format set to {formattype}.")
     globsets = [(key, item) for key, item in global_jason.items()]
-    print(globsets,flush=True)
+
+    logging.debug(f"Checking globals for meshes:")
     for key, item in globsets:
-        print(key, isinstance(item, dict) and item.get("meshtype"),flush=True)
+        logging.debug(f"\t{key}.")
         if (key == "grd" or isinstance(item, dict) and (meshtype := item.get("meshtype"))):
-            logging.debug(f"Reading mesh {key}.")
+            logging.debug(f"\tReading mesh {key}.")
             if key == "grd":
                 meshtype = None
                 if not isinstance(item, dict):
@@ -582,11 +577,12 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
 
                 global_jason[key]["vals"] = readfunc(global_jason[key]["path"], *readargs, **readkwargs)
 
-    logging.debug("Making pngs and pages dirs.")
     pngpath = os.path.join(savedir, "pngs")
     if not os.path.exists(pngpath):
+        logging.debug("Making pngs dir.")
         os.mkdir(pngpath)
     if pdf:
+        logging.debug("Making pdf pages dir.")
         pagespath = os.path.join(savedir, "pages")
         if not os.path.exists(pagespath):
             os.mkdir(pagespath)
@@ -688,7 +684,6 @@ def vispipe(config, image=True, pdf=False, compress=False, loglevel=30):
                 logging.debug(f"All minreqs found for {key}.")
                 locplotdict["loglevel"] = loglevel
                 locplotdict["pagenumber"] = i + j / 10
-                #print(locplotdict["titlepre"])
                 inputs.append(locplotdict)
             else:
                 logging.error(

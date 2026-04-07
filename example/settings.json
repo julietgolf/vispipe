@@ -59,7 +59,7 @@
             "plotter":"tricontour",
             "xlabel": "Longitude (deg)",
             "ylabel": "Latitude (deg)",
-            "emptyval": -99999,
+            "empty_value": -99999,
             "unit": "meter"
         },
         "struct_data": {
@@ -68,7 +68,8 @@
             "plotter":"contour",
             "xlabel": "Longitude (deg)",
             "ylabel": "Latitude (deg)",
-            "unit": "sec"
+            "unit": "sec",
+            "titlepre":"testpre"
         },
         "xy_data":{
             "base": "data_base",
