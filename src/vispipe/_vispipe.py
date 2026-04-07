@@ -265,7 +265,7 @@ def _pipeline(kwargs):
 
         # Checks if the unit needs to be changed.
         if "unit" in kwargs or "defunit" in kwargs:
-            logging.debug(f"Checking if data needs a unit conversion {"unit" in kwargs} {"defunit" in kwargs}.")
+            logging.debug(f"Checking if data needs a unit conversion.")
             try:
                 unit=kwargs["unit"]
                 if unit and unit != kwargs.get("defunit") != None:# and kwargs.get("mesh"):
