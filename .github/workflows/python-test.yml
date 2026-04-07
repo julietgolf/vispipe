@@ -29,6 +29,7 @@ jobs:
         run: |
 
           python -m pip install uv
+          uv python install ${{ matrix.python-version }}
           uv venv
           uv pip install .
         shell: bash
