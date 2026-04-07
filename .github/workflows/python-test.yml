@@ -27,10 +27,8 @@ jobs:
         # This step installs uv, creates a virtual environment,
         # and installs the current project (vispipe) into it.
         run: |
-
           python -m pip install uv
-          uv python install ${{ matrix.python-version }}
-          uv venv
+          uv venv --python ${{ matrix.python-version }}
           uv pip install .
         shell: bash
 
@@ -49,6 +47,7 @@ jobs:
           # Navigate and run tests
           cd example
           uv pip install .
+          python --version
           vispipe --swap_settings settings.json
           vispipe -v config.json | tee test.out
           grep -qP "^ERROR:" test.out && exit 1 || true
