@@ -49,7 +49,9 @@ jobs:
           cd example
           uv pip install .
           vispipe --swap_settings settings.json
-          vispipe -v config.json
+          vispipe -v config.json | tee test.out
+          grep ERROR < test.out && exit 1
+
         shell: bash
 
       - name: Upload Test Output (PNGs)

@@ -30,7 +30,8 @@
         },
         "unstruct_grd:0":{
             "plotter":"triplot",
-            "mesh":"unstruct_grd"
+            "mesh":"unstruct_grd",
+            "Fuck":true
         },
         "unstruct_data":{
             "title":"test",
