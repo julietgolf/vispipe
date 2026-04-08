@@ -1,3 +1,5 @@
+from importlib.metadata import version as get_version
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -8,7 +10,7 @@
 
 project = "VisPipe"
 author = "Gramm, Joshua"
-release = "1.0.3"
+release = get_version("vispipe")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

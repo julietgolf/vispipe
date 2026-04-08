@@ -48,6 +48,7 @@ def main():
         const=20,
         help="Show info messages.",
         default=30,
+        dest="log_level"
     ),
     _vispipe_parser.add_argument(
         "--debug",
@@ -55,6 +56,7 @@ def main():
         const=10,
         help="Show debugging messages.",
         default=30,
+        dest="log_level"
     )
     _vispipe_parser.add_argument(
         "-o",
@@ -99,7 +101,7 @@ def main():
     )
 
     args = _vispipe_parser.parse_args()
-    logging.basicConfig(format="%(levelname)s: %(message)s", level=args.verbose)
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=args.log_level)
 
     if args.swap_settings:
         path = os.path.dirname(os.path.abspath(__file__))
@@ -137,7 +139,7 @@ def main():
                     "image": args.image,
                     "pdf": args.pdf,
                     "compress": args.compress,
-                    "loglevel": args.verbose,
+                    "loglevel": args.log_level,
                 },
             )
         except Exception as e:
