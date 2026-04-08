@@ -27,3 +27,9 @@ vispipe="vispipe.vispipe_cli:main"
 [build-system]
 requires = ["setuptools >= 59.0"]
 build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.7",
+    "ty>=0.0.24",
+]

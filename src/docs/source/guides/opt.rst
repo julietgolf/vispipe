@@ -11,6 +11,7 @@ files have multiple groups of plots with common settings, such as a common ``"bb
 .. note::
     This page applies to both ``dict`` types and JSON types. All types will be referred to by there Python types for simplicity except for ``null``.
 
+.. _opt-structure:
 
 Structure
 =========
@@ -141,13 +142,10 @@ to write a config from the OPT file.
 .. seealso::
     :ref:`Vispipe CLI<opt_cli>` for more information on terminal flags.
 
-comandline vs functions
-
-
-
-
-Generating Config
------------------
-
-kwarg and cli
+..
+    comandline vs functions
+..
+    Generating Config
+..
+    kwarg and cli
 

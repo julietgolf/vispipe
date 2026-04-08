@@ -153,9 +153,13 @@ the bread. As long as there are no holes in the bread, it should fall apart when
 Execution
 *********
 
-To execute, either :doc:`vispipe.vispipe</reference/vispipe/vispipe.vispipe>` or the built in terminal command :doc:`vispipe</reference/cli>`. Both 
-take the path to the config as their first argument, but the function can take a config ``dict`` inplace of the path. Vispipe can out put the plots
-as PNGs, a .tar.gz of the PNGs, or as a PDF using the options below.
+To execute, use either :doc:`vispipe.vispipe</reference/vispipe/vispipe.vispipe>` or the built in terminal command :doc:`vispipe</reference/cli>`. Both 
+take the path to the config as their first argument, but the function can take a config ``dict`` inplace of the path. 
+
+For simplified workflows, :doc:`vispipe.opt_reader</reference/vispipe/vispipe.opt_reader>` (or the ``-o`` CLI flag) 
+can be used to automatically generate complex configurations from lightweight ``.opt`` files.
+
+Vispipe can output the plots as PNGs, a .tar.gz of the PNGs, or as a PDF using the options below.
 
 .. list-table:: Output Options
     :widths: auto
@@ -176,7 +180,7 @@ as PNGs, a .tar.gz of the PNGs, or as a PDF using the options below.
       - -c, --compress
 
 .. note::
-    ``image`` is ``True`` by default. If ``pdf`` and ``compress`` are ``True`` ``image`` will only be ``not``ed once. If ``image`` is set to ``False`` when either 
+    ``image`` is ``True`` by default. If both ``pdf`` and ``compress`` are ``True``, ``image`` will only have ``not`` performed once. If ``image`` is set to ``False`` when either 
     is set to ``True``, ``images`` will be switched back to ``True``.
 
 .. seealso::

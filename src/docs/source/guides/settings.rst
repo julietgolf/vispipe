@@ -180,6 +180,35 @@ Type Aliasing
 By default, the key used in a config is used to search ``"universal"`` settings. This does not work when there are 
 multiple sets of data of the same datatype since this would cause a naming conflict. 
 
+..
+    TODO make a unit management page
+
+Unit Management
+^^^^^^^^^^^^^^^
+
+VisPipe integrates with the `pint <https://pint.readthedocs.io/>`_ library for robust unit management and 
+automatic unit conversion. This is controlled via two primary keywords in the settings:
+
+* ``"defunit"``: The default unit of the data as it is read from the source file.
+* ``"unit"``: The desired unit for the data in the final plot.
+
+If both ``"defunit"`` and ``"unit"`` are provided and they differ, VisPipe will automatically perform the 
+conversion before plotting. This ensures that data from various sources can be unified into a single 
+coordinate or measurement system without manual pre-processing.
+
+.. code-block:: JSON
+    :caption: Automatic conversion from meters to feet.
+
+    "maxele": {
+        "defunit": "meter",
+        "unit": "feet",
+        "titlepre": "Maximum Water Surface Elevation"
+    }
+
+.. warning::
+    If conversion fails (e.g., incompatible units or missing definitions), VisPipe will log a warning and 
+    default to using the ``"defunit"``.
+
 "readers" and "plotters"
 ------------------------
 

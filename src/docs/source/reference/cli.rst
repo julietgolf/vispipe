@@ -1,5 +1,5 @@
-Vispipe Terminal Command
-########################
+Vispipe CLI
+###########
 
 
 Vispipe comes with a built in terminal command that allows for vispipe to be called from outside a Python script.
@@ -36,8 +36,13 @@ associated flags allows for .opt files to be read directly.
       - False
     * - v
       - verbose
-      - store_const, 10
+      - Show info messages.
+      - store_const, 20
+      - 30
+    * - 
+      - debug
       - Show debugging messages.
+      - store_const, 10
       - 30
 
 .. _opt_cli:

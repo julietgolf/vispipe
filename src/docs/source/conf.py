@@ -1,3 +1,5 @@
+from importlib.metadata import version as get_version
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -6,22 +8,23 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'VisPipe'
-author = 'Gramm, Joshua'
-release = '1.0.3'
+project = "VisPipe"
+author = "Gramm, Joshua"
+release = get_version("vispipe")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc",
-              "numpydoc",
-              "sphinx_autodoc_typehints",
-              "sphinx.ext.autosummary",
-              "sphinx.ext.autosectionlabel",
-              "sphinx.ext.extlinks"
-              ]
+extensions = [
+    "sphinx.ext.autodoc",
+    "numpydoc",
+    "sphinx_autodoc_typehints",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.extlinks",
+]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
@@ -29,22 +32,22 @@ exclude_patterns = []
 
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ['_static']
-html_theme_options = {
-   "pygment_light_style": "tango",
-   "pygment_dark_style": "monokai"
-}
+html_static_path = ["_static"]
+html_theme_options = {"pygment_light_style": "tango", "pygment_dark_style": "monokai"}
 numpydoc_show_class_members = False
-autodoc_member_order="bysource"
-autoclass_content = 'both'
-autosummary_generate_overwrite=False
+autodoc_member_order = "bysource"
+autoclass_content = "both"
+autosummary_generate_overwrite = False
 
 rst_prolog = """
 .. include:: <s5defs.txt>
 """
 
-html_css_files = ['css/colors.css']
+html_css_files = ["css/colors.css"]
 
-extlinks = {"pint_units":("https://github.com/hgrecco/pint/blob/master/pint/default_en.txt",None)}
-
-
+extlinks = {
+    "pint_units": (
+        "https://github.com/hgrecco/pint/blob/master/pint/default_en.txt",
+        None,
+    )
+}

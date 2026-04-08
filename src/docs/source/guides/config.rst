@@ -13,6 +13,7 @@ plotted, and the settings used to plot them are defined. Configs can be either a
 .. note::
     This page applies to both ``dict`` types and JSON types. All types will be referred to by there Python types for simplicity except for ``null``. 
 
+.. _config-structure:
 
 Structure
 =========
